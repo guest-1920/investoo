@@ -1,0 +1,134 @@
+.tickets-page {
+    padding: var(--spacing-4);
+}
+
+.ticket-detail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+}
+
+.ticket-meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    padding-bottom: var(--spacing-4);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.meta-item {
+    display: flex;
+    gap: var(--spacing-2);
+    align-items: center;
+}
+
+.meta-label {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    min-width: 100px;
+}
+
+.meta-value {
+    color: var(--color-text);
+}
+
+.meta-row {
+    display: flex;
+    gap: var(--spacing-6);
+    flex-wrap: wrap;
+}
+
+.conversation h4 {
+    margin-bottom: var(--spacing-4);
+    color: var(--color-text);
+}
+
+.messages {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.message {
+    padding: var(--spacing-3);
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-secondary);
+}
+
+.message.admin {
+    background-color: var(--color-primary-bg);
+    border-left: 3px solid var(--color-primary);
+}
+
+.message.user {
+    background-color: var(--color-bg-tertiary);
+    border-left: 3px solid var(--color-text-secondary);
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-2);
+}
+
+.message-author {
+    font-weight: 600;
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+}
+
+.message-time {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+}
+
+.message-body {
+    color: var(--color-text);
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+/* Priority badges */
+.priority-urgent {
+    background-color: var(--color-error-bg) !important;
+    color: var(--color-error) !important;
+}
+
+.priority-high {
+    background-color: var(--color-warning-bg) !important;
+    color: var(--color-warning) !important;
+}
+
+.priority-normal {
+    background-color: var(--color-bg-tertiary) !important;
+    color: var(--color-text-secondary) !important;
+}
+
+/* Status badges */
+.status-open {
+    background-color: var(--color-info-bg) !important;
+    color: var(--color-info) !important;
+}
+
+.status-in-progress {
+    background-color: var(--color-warning-bg) !important;
+    color: var(--color-warning) !important;
+}
+
+.status-resolved {
+    background-color: var(--color-success-bg) !important;
+    color: var(--color-success) !important;
+}
+
+.status-closed {
+    background-color: var(--color-bg-tertiary) !important;
+    color: var(--color-text-secondary) !important;
+}
+
+.loading-spinner {
+    padding: var(--spacing-6);
+    text-align: center;
+    color: var(--color-text-secondary);
+}

@@ -1,0 +1,133 @@
+.typeahead-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.typeahead-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.typeahead-input-container .form-input {
+    padding-right: 32px;
+}
+
+.typeahead-spinner {
+    position: absolute;
+    right: 10px;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: typeahead-spin 0.7s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes typeahead-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.typeahead-clear {
+    position: absolute;
+    right: 8px;
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: transparent;
+    color: #999;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    padding: 0;
+}
+
+.typeahead-clear:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.typeahead-dropdown {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    width: 100%;
+    max-height: 220px;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    z-index: 1000;
+    list-style: none;
+    padding: 4px;
+    margin: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.typeahead-option {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    cursor: pointer;
+    color: #333;
+    transition: background 0.1s;
+    border-radius: 4px;
+}
+
+.typeahead-option:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.typeahead-option.selected {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.typeahead-option .option-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.typeahead-option .option-description {
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.typeahead-option:hover .option-description {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.typeahead-message {
+    padding: 10px 12px;
+    text-align: center;
+    color: #888;
+    font-size: 0.85rem;
+}
+
+/* Scrollbar */
+.typeahead-dropdown::-webkit-scrollbar {
+    width: 5px;
+}
+
+.typeahead-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.typeahead-dropdown::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.typeahead-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}

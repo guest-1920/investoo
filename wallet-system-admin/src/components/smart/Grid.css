@@ -1,0 +1,146 @@
+.grid-wrapper {
+    background-color: var(--color-surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+}
+
+.grid-container {
+    overflow-x: auto;
+    /* Ensure dropdowns aren't clipped if table scrolls - usually requires min-height or specific overflow handling */
+    /* For simple implementation, overflow-x: auto might clip the dropdown if it exceeds table bounds. 
+       However, 'position: relative' is on the wrapper inside the cell. 
+       If the table scrolls, the menu moves with it. 
+       If menu goes outside container, it might be clipped. 
+       Proper solution uses Portals or fixed positioning, but simple absolute usually works for small tables.
+       Given the request simplified context, this is acceptable. */
+}
+
+.grid-loading,
+.grid-empty {
+    padding: var(--spacing-12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-3);
+    color: var(--color-text-muted);
+}
+
+/* Empty state inside the table */
+.grid-empty-row {
+    background-color: var(--color-surface);
+}
+
+.grid-empty-row:hover {
+    background-color: var(--color-surface);
+}
+
+.grid-empty-cell {
+    padding: var(--spacing-12) var(--spacing-4) !important;
+}
+
+.grid-empty-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    color: var(--color-text-muted);
+}
+
+.grid-empty-message p {
+    margin: 0;
+    font-size: var(--font-size-base);
+}
+
+.sort-indicator {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
+}
+
+.actions-cell {
+    /* Reset specific display to allow vertical-align from table-cell */
+    display: table-cell;
+    vertical-align: middle !important;
+    padding: var(--spacing-2);
+}
+
+.actions-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+}
+
+/* Ensure table rows don't clip content (default table behavior allows overflow usually) */
+/* But .grid-container has overflow-x: auto which acts as a stacking context clipping overflow */
+/* To fix typical clipping issues in scrolling tables:
+   If the menu is inside the scrollable container, it must be fully visible.
+   Often we need to unsure the table has enough height or use a portal (React Portal).
+   For now, we'll try to keep it simple.*/
+
+.pagination-page {
+    padding: 0 var(--spacing-3);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+/* Dropdown Menu Styles */
+.grid-action-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 4px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    /* High z-index */
+    min-width: 150px;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-1) 0;
+}
+
+.grid-action-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    width: 100%;
+    text-align: left;
+    padding: var(--spacing-2) var(--spacing-4);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    transition: background-color 0.15s;
+    font-family: var(--font-family);
+}
+
+.grid-action-menu-item:hover:not(:disabled) {
+    background-color: var(--color-surface-secondary);
+}
+
+.grid-action-menu-item:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.grid-action-menu-item.text-error {
+    color: var(--color-error);
+}
+
+.grid-action-menu-item.text-error:hover:not(:disabled) {
+    background-color: var(--color-error-bg);
+}
+
+.grid-action-menu-item .icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+}

@@ -1,0 +1,104 @@
+.Investoo-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Icon - white square with black circle */
+.Investoo-logo__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.Investoo-logo__circle {
+    border-radius: 50%;
+}
+
+/* Text */
+.Investoo-logo__text {
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+/* Size variants */
+.Investoo-logo--sm .Investoo-logo__icon {
+    width: 24px;
+    height: 24px;
+}
+
+.Investoo-logo--sm .Investoo-logo__circle {
+    width: 12px;
+    height: 12px;
+}
+
+.Investoo-logo--sm .Investoo-logo__text {
+    font-size: 1rem;
+}
+
+.Investoo-logo--md .Investoo-logo__icon {
+    width: 32px;
+    height: 32px;
+}
+
+.Investoo-logo--md .Investoo-logo__circle {
+    width: 16px;
+    height: 16px;
+}
+
+.Investoo-logo--md .Investoo-logo__text {
+    font-size: 1.25rem;
+}
+
+.Investoo-logo--lg .Investoo-logo__icon {
+    width: 40px;
+    height: 40px;
+}
+
+.Investoo-logo--lg .Investoo-logo__circle {
+    width: 20px;
+    height: 20px;
+}
+
+.Investoo-logo--lg .Investoo-logo__text {
+    font-size: 1.5rem;
+}
+
+/* Color variants */
+.Investoo-logo--dark .Investoo-logo__icon {
+    background-color: #000000;
+}
+
+.Investoo-logo--dark .Investoo-logo__circle {
+    background-color: #ffffff;
+}
+
+.Investoo-logo--dark .Investoo-logo__text {
+    color: var(--color-text-primary);
+}
+
+.Investoo-logo--light .Investoo-logo__icon {
+    background-color: #ffffff;
+}
+
+.Investoo-logo--light .Investoo-logo__circle {
+    background-color: #000000;
+}
+
+.Investoo-logo--light .Investoo-logo__text {
+    color: #ffffff;
+}
+
+/* Primary (blue) variant */
+.Investoo-logo--primary .Investoo-logo__icon {
+    background-color: var(--color-primary);
+}
+
+.Investoo-logo--primary .Investoo-logo__circle {
+    background-color: #ffffff;
+}
+
+.Investoo-logo--primary .Investoo-logo__text {
+    color: var(--color-primary);
+}

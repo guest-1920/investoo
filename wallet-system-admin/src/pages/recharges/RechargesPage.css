@@ -1,0 +1,32 @@
+.requests-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.page-header h2 {
+    margin: 0;
+}
+
+.page-filters {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.filter-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+}
+
+.filter-select {
+    width: auto;
+    min-width: 160px;
+}

@@ -1,0 +1,1452 @@
+{
+    "info": {
+        "_postman_id": "wallet-system-backend-api",
+        "name": "Investoo Wallet System API",
+        "description": "Complete API collection for the Investoo Wallet System Backend.\n\n## Authentication\nThis API uses cookie-based JWT authentication. After login, the `access_token` cookie is set automatically.\n\n## Base URL\nSet the `{{baseUrl}}` variable to your server URL (e.g., `http://localhost:3000`).\n\n## Roles\n- **USER**: Regular users\n- **ADMIN**: Administrators with elevated privileges",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000",
+            "type": "string"
+        },
+        {
+            "key": "userId",
+            "value": "user-uuid-here",
+            "type": "string"
+        },
+        {
+            "key": "planId",
+            "value": "plan-uuid-here",
+            "type": "string"
+        },
+        {
+            "key": "rechargeId",
+            "value": "recharge-uuid-here",
+            "type": "string"
+        },
+        {
+            "key": "withdrawalId",
+            "value": "withdrawal-uuid-here",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Health",
+            "description": "Health check endpoints (no /api/v1 prefix)",
+            "item": [
+                {
+                    "name": "Application Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/health",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "PUBLIC: Check application health status"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Database Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/health/db",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "health",
+                                "db"
+                            ]
+                        },
+                        "description": "PUBLIC: Check database connection health"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Authentication",
+            "description": "User registration, login, and logout endpoints",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePass123!\",\n  \"referralCode\": \"\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "PUBLIC: Register a new user account.\n\n**Password Requirements:**\n- Minimum 8 characters\n- At least one uppercase letter\n- At least one lowercase letter\n- At least one number\n- At least one special character\n\n**referralCode** is optional."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePass123!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "PUBLIC: Login for both USER and ADMIN roles.\n\nReturns user data with role. Sets `access_token` httpOnly cookie."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/logout",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "logout"
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ANY role): Logout and clear auth cookie."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Users",
+            "description": "User profile endpoints",
+            "item": [
+                {
+                    "name": "Get Current User (Me)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                "me"
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ANY role): Get the currently authenticated user's profile."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Users (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page (default: 10)"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): List all users with pagination."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get User by ID (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{userId}}",
+                                    "description": "User UUID"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Get any user's profile by their ID."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update My Profile",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"newemail@example.com\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                "me"
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ANY role): Update current user's profile.\n\nAll fields are optional."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update User (Admin)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"newemail@example.com\",\n  \"role\": \"USER\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/users/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{userId}}",
+                                    "description": "User UUID"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Update any user's profile including role.\n\n**role** options: USER, ADMIN"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Wallet",
+            "description": "Wallet balance and transaction endpoints",
+            "item": [
+                {
+                    "name": "Get My Balance",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/wallet/balance",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "wallet",
+                                "balance"
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (USER): Get current user's wallet balance, available balance, and pending withdrawals."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Transactions",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/wallet/transactions?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "wallet",
+                                "transactions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page (default: 10)"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (USER): Get current user's wallet transaction ledger with pagination."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get User Balance (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/wallet/balance/:userId",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "wallet",
+                                "balance",
+                                ":userId"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "userId",
+                                    "value": "{{userId}}",
+                                    "description": "User UUID"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Get any user's wallet balance."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get User Transactions (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/wallet/transactions/:userId?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "wallet",
+                                "transactions",
+                                ":userId"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "userId",
+                                    "value": "{{userId}}",
+                                    "description": "User UUID"
+                                }
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page (default: 10)"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Get any user's wallet transaction ledger."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Transactions (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/wallet/all?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "wallet",
+                                "all"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page (default: 10)"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Get all wallet transactions across all users with pagination and filters."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Recharges",
+            "description": "Recharge request and management endpoints",
+            "item": [
+                {
+                    "name": "Request Recharge",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"amount\": 1000,\n  \"blockchainAddress\": \"TR7NHkorMAgx4yF2E8M17tK786n45a\",\n  \"chainName\": \"TRON\",\n  \"transactionId\": \"f4a5b6c7d8e9f0a1b2c3d4e5f6g7h8i9j0k1l2m3\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/recharges",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "recharges"
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (USER): Submit a recharge request.\n\nRequired fields: amount, blockchainAddress, chainName, transactionId."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Recharges",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/recharges/my?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "recharges",
+                                "my"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page (default: 10)"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (USER): Get current user's recharge history."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Pending Recharges (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/recharges/pending?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "recharges",
+                                "pending"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page (default: 10)"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): List all pending recharge requests."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Recharges (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/recharges?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "recharges"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page (default: 10)"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): List all recharges with pagination."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Approve/Reject Recharge (Admin)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"APPROVED\",\n  \"adminRemark\": \"Payment verified\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/recharges/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "recharges",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{rechargeId}}",
+                                    "description": "Recharge request UUID"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Approve or reject a recharge request.\n\n**status** options: APPROVED, REJECTED\n\n**adminRemark** is optional."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Withdrawals",
+            "description": "Withdrawal request and management endpoints",
+            "item": [
+                {
+                    "name": "Request Withdrawal",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"amount\": 500,\n  \"blockchainAddress\": \"TR7NHkorMAgx4yF2E8M17tK786n45a\",\n  \"chainName\": \"TRON\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/withdrawals",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "withdrawals"
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (USER): Submit a withdrawal request.\n\nRequired fields: amount, blockchainAddress, chainName."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Withdrawals",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/withdrawals/my?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "withdrawals",
+                                "my"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page (default: 10)"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (USER): Get current user's withdrawal history."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Pending Withdrawals (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/withdrawals/pending?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "withdrawals",
+                                "pending"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page (default: 10)"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): List all pending withdrawal requests."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Withdrawals (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/withdrawals?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "withdrawals"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page (default: 10)"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): List all withdrawals with pagination."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Approve/Reject Withdrawal (Admin)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"APPROVED\",\n  \"adminRemark\": \"Payout processed\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/withdrawals/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "withdrawals",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{withdrawalId}}",
+                                    "description": "Withdrawal request UUID"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Approve or reject a withdrawal request.\n\n**status** options: APPROVED, REJECTED\n\n**adminRemark** is optional."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Plans",
+            "description": "Investment plan endpoints",
+            "item": [
+                {
+                    "name": "List Active Plans (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/plans",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "plans"
+                            ]
+                        },
+                        "description": "PUBLIC: Get all active investment plans."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Plan Details (Public)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/plans/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "plans",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{planId}}",
+                                    "description": "Plan UUID"
+                                }
+                            ]
+                        },
+                        "description": "PUBLIC: Get details of a specific plan."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Plan (Admin)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Gold Plan\",\n  \"description\": \"Premium investment plan with high returns\",\n  \"price\": 10000,\n  \"validity\": 30,\n  \"referralReward\": 500,\n  \"dailyReturn\": 100\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/plans",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "plans"
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Create a new investment plan.\n\n**validity**: Number of days (1-365)\n\n**referralReward** and **dailyReturn** are optional."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Plan (Admin)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Gold Plan\",\n  \"price\": 12000\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/plans/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "plans",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{planId}}",
+                                    "description": "Plan UUID"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Update an existing plan. All fields are optional (partial update)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Activate Plan (Admin)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/plans/:id/activate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "plans",
+                                ":id",
+                                "activate"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{planId}}",
+                                    "description": "Plan UUID"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Activate a deactivated plan."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Deactivate Plan (Admin)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/plans/:id/deactivate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "plans",
+                                ":id",
+                                "deactivate"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{planId}}",
+                                    "description": "Plan UUID"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Deactivate an active plan."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Plans (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/plans/admin/all?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "plans",
+                                "admin",
+                                "all"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page (default: 10)"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): List all plans (active and inactive) with pagination."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Plan (Admin)",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/plans/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "plans",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{planId}}",
+                                    "description": "Plan UUID"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Soft delete a plan."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Dashboard",
+            "description": "Admin dashboard analytics endpoints",
+            "item": [
+                {
+                    "name": "Get Summary (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/dashboard/summary",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "dashboard",
+                                "summary"
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Get dashboard summary metrics (total users, revenue, recharges, withdrawals)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Charts (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/dashboard/charts",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "dashboard",
+                                "charts"
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Get chart data for dashboard visualizations."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Subscriptions",
+            "description": "Plan subscription endpoints",
+            "item": [
+                {
+                    "name": "Purchase Plan",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/subscriptions/buy/:planId",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "subscriptions",
+                                "buy",
+                                ":planId"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "planId",
+                                    "value": "{{planId}}",
+                                    "description": "Plan UUID to purchase"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (USER): Purchase/subscribe to a plan. Deducts the plan price from wallet balance."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Subscription",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/subscriptions/me",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "subscriptions",
+                                "me"
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (USER): Get current user's active subscription details."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Subscription History",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/subscriptions/history",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "subscriptions",
+                                "history"
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (USER): Get current user's subscription history (all past and current subscriptions)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Subscriptions (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/subscriptions?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "subscriptions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page (default: 10)"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): List all subscriptions with pagination."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Daily Returns",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/subscriptions/daily-returns/my",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "subscriptions",
+                                "daily-returns",
+                                "my"
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (USER): Get current user's daily return logs."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Daily Returns (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/subscriptions/daily-returns?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "subscriptions",
+                                "daily-returns"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page (default: 10)"
+                                }
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): List all daily return logs with pagination."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Trigger Daily Returns (Admin)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/subscriptions/daily-returns/trigger",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "subscriptions",
+                                "daily-returns",
+                                "trigger"
+                            ]
+                        },
+                        "description": "AUTH REQUIRED (ADMIN only): Manually trigger daily returns processing for all active subscriptions."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Schemas",
+            "description": "Dynamic form schema endpoints for frontend form generation",
+            "item": [
+                {
+                    "name": "List All Schemas",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/schemas",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "schemas"
+                            ]
+                        },
+                        "description": "PUBLIC: Get list of all registered form schema names.\n\nReturns: `{ schemas: ['register', 'login', 'create-plan', ...] }`"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Schema by Name",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/schemas/:name",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "schemas",
+                                ":name"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "name",
+                                    "value": "register",
+                                    "description": "Schema name (e.g., register, login, create-plan)"
+                                }
+                            ]
+                        },
+                        "description": "PUBLIC: Get schema definition for dynamic form generation.\n\nReturns field definitions with types, labels, validation rules, and typeahead configs."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List All Grid Schemas",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/schemas/grids",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "schemas",
+                                "grids"
+                            ]
+                        },
+                        "description": "PUBLIC: Get list of all registered grid schema names.\n\nReturns: `{ schemas: ['users', 'plans', 'recharges', ...] }`"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Grid Schema by Name",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/schemas/grid/:name",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "schemas",
+                                "grid",
+                                ":name"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "name",
+                                    "value": "users",
+                                    "description": "Entity name (e.g., users, plans, recharges)"
+                                }
+                            ]
+                        },
+                        "description": "PUBLIC: Get grid schema definition for grid generation.\n\nReturns column definitions with types, labels, sortable, filterable options, and typeahead configs."
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}

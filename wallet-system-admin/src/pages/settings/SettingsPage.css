@@ -1,0 +1,123 @@
+/* Settings Page - Minimal custom styles, uses global design system */
+
+.settings-page {
+    padding: var(--spacing-6);
+    max-width: 900px;
+}
+
+.settings-page-header {
+    margin-bottom: var(--spacing-6);
+}
+
+.settings-page-header h1 {
+    margin-bottom: var(--spacing-1);
+}
+
+/* Settings Grid for Financial Parameters */
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-6);
+}
+
+@media (max-width: 768px) {
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Input Group - for prefix/suffix styling */
+.input-group {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.input-group .form-input {
+    flex: 1;
+}
+
+.input-prefix {
+    position: absolute;
+    left: var(--spacing-3);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.input-prefix+.form-input {
+    padding-left: var(--spacing-8);
+}
+
+.input-suffix {
+    position: absolute;
+    right: var(--spacing-3);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    pointer-events: none;
+}
+
+.input-group .form-input:has(+ .input-suffix) {
+    padding-right: var(--spacing-8);
+}
+
+/* Display Value - read-only mode with subtle box */
+.display-value {
+    padding: var(--spacing-2) var(--spacing-3);
+    background-color: var(--color-surface-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+}
+
+/* Form Hint */
+.form-hint {
+    margin-top: var(--spacing-1);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+/* Percent Input - inline with % symbol */
+.percent-input-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1);
+}
+
+.percent-input {
+    width: 80px !important;
+}
+
+.percent-symbol {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+/* Simple trash button - no background */
+.btn-trash {
+    background: none;
+    border: none;
+    padding: var(--spacing-1);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-trash:hover {
+    color: var(--color-error);
+}
+
+/* Ensure action column cells center content */
+.data-table td.align-center {
+    text-align: center;
+}
+
+/* Disabled inputs should have white background */
+.settings-page .form-input:disabled {
+    background-color: var(--color-surface);
+    cursor: default;
+}

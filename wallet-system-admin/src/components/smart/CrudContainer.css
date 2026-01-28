@@ -1,0 +1,24 @@
+.crud-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.crud-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.crud-header h2 {
+    margin: 0;
+    font-size: var(--font-size-xl);
+}
+
+.crud-error {
+    padding: var(--spacing-4);
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+}
