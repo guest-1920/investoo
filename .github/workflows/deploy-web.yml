@@ -22,7 +22,7 @@ jobs:
       - name: Deploy Web Client
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.VPS_IP }} << 'EOF'
-            cd /var/www/investoo/client
+            cd /var/www/investoo/investoo/investo-web
             git pull origin main
             npm ci
             # Re-inject env var if needed

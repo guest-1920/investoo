@@ -22,7 +22,7 @@ jobs:
       - name: Deploy Admin
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.VPS_IP }} << 'EOF'
-            cd /var/www/investoo/admin
+            cd /var/www/investoo/investoo/wallet-system-admin
             git pull origin main
             npm ci
             npm run build

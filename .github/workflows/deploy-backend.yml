@@ -22,7 +22,7 @@ jobs:
       - name: Deploy Backend
         run: |
           ssh -o StrictHostKeyChecking=no root@${{ secrets.VPS_IP }} << 'EOF'
-            cd /var/www/investoo/backend
+            cd /var/www/investoo/investoo/wallet-system-backend
             git pull origin main
             npm ci
             npm run build
