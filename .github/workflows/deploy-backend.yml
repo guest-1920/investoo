@@ -1,0 +1,31 @@
+name: Deploy Backend
+
+on: 
+  push:
+    branches: [main]
+    paths:
+      - 'wallet-system-backend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.VPS_SSH_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+
+      - name: Deploy Backend
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.VPS_IP }} << 'EOF'
+            cd /var/www/investoo/backend
+            git pull origin main
+            npm ci
+            npm run build
+            npm run migration:run
+            pm2 reload investo-backend
+          EOF

@@ -1,0 +1,31 @@
+name: Deploy Web Client
+
+on: 
+  push:
+    branches: [main]
+    paths:
+      - 'investo-web/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.VPS_SSH_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+
+      - name: Deploy Web Client
+        run: |
+          ssh -o StrictHostKeyChecking=no root@${{ secrets.VPS_IP }} << 'EOF'
+            cd /var/www/investoo/client
+            git pull origin main
+            npm ci
+            # Re-inject env var if needed
+            # echo "Vite_API_URL=https://api.investoo.co.in/api/v1" > .env
+            npm run build
+          EOF
