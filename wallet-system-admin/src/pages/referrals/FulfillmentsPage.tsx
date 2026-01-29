@@ -38,14 +38,15 @@ export function FulfillmentsPage() {
 
     return (
         <div>
-            <div>
-                <label className="flex justify-end mb-4">
-                    <Input
+            <div className="flex justify-end mb-4">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
                         type="checkbox"
                         checked={showPendingOnly}
                         onChange={(e) => setShowPendingOnly(e.target.checked)}
+                        className="form-checkbox"
                     />
-                    <span className="ml-2">Show Pending Only</span>
+                    <span>Show Pending Only</span>
                 </label>
             </div>
             <CrudContainer
