@@ -38,6 +38,16 @@ export function FulfillmentsPage() {
 
     return (
         <div>
+            <div>
+                <label className="flex justify-end mb-4">
+                    <Input
+                        type="checkbox"
+                        checked={showPendingOnly}
+                        onChange={(e) => setShowPendingOnly(e.target.checked)}
+                    />
+                    <span className="ml-2">Show Pending Only</span>
+                </label>
+            </div>
             <CrudContainer
                 entityName="Fulfillment"
                 listEndpoint={showPendingOnly ? "/referrals/fulfillments/admin/pending" : "/referrals/fulfillments/admin/all"}

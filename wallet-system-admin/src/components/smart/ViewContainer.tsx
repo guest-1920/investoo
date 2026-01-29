@@ -106,8 +106,8 @@ export function ViewContainer({
                 totalPages: 1
             } : {
                 data: responseData.data || [],
-                total: responseData.total || 0,
-                totalPages: responseData.totalPages || 1
+                total: responseData.meta?.totalItems || 0,
+                totalPages: responseData.meta?.totalPages || 1
             };
 
             setTabData(prev => ({
