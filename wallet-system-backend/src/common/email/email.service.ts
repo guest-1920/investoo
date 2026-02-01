@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
 import { verificationTemplate } from './templates/verification';
 import { otpTemplate } from './templates/otp';
 import { resetPasswordTemplate } from './templates/reset-password';
@@ -11,20 +11,53 @@ import { fulfillmentStatusTemplate } from './templates/fulfillment-status';
 
 @Injectable()
 export class EmailService {
-  private transporter: nodemailer.Transporter;
+  private readonly apiKey: string;
+  private readonly apiUrl: string;
   private readonly logger = new Logger(EmailService.name);
 
   constructor(private readonly configService: ConfigService) {
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    this.apiKey = this.configService.get<string>('NITROMAIL_API_KEY');
+    this.apiUrl = this.configService.get<string>('NITROMAIL_API_URL');
   }
+
+  private async sendEmail(to: string, subject: string, htmlBody: string){
+    try {
+      const senderEmail = process.env.SMTP_FROM || 'no-reply@investoo.net';
+      const fromName = 'Investoo';
+
+      const payload = {
+        to: [to],
+        from: `${fromName} <${senderEmail}>`,
+        sender: senderEmail,
+        reply_to: senderEmail,
+        subject: subject,
+        html_body: htmlBody,
+        headers: {charset: 'UTF-8'}
+      };
+
+      const response = await axios.post(this.apiUrl, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-SERVER-API-KEY': this.apiKey,
+        },
+      });
+
+      if(response.data.status !== 'success'){
+      this.logger.error(`Failed to send email to ${to}: ${response.data.data || response.data}`);
+
+      throw new Error(`Email service returned error: ${response.data.status}`);
+      }
+
+      this.logger.log(`Email sent to ${to}, Status: ${response.data.status} with subject "${subject}"`);
+      return response.data;
+
+    }catch (error) {
+      this.logger.error(`Error sending email to ${to}: ${error.response?.data || error.message}`, error.stack);
+      throw error;
+    }
+
+   
+
 
   private formatDuration(seconds: number): string {
     if (seconds >= 3600) {
@@ -49,18 +82,7 @@ export class EmailService {
 
     const html = verificationTemplate(url, expiresIn);
 
-    try {
-      await this.transporter.sendMail({
-        from: process.env.SMTP_FROM,
-        to: email,
-        subject: 'Verify your email address',
-        html,
-      });
-      this.logger.log(`Verification email sent to ${email}`);
-    } catch (error) {
-      this.logger.error(`Failed to send verification email to ${email}`, error);
-      throw error;
-    }
+    await this.sendEmail(email, 'Verify your email address', html);
   }
 
   async sendLoginOtp(email: string, otp: string) {
@@ -69,18 +91,7 @@ export class EmailService {
 
     const html = otpTemplate(otp, expiresIn);
 
-    try {
-      await this.transporter.sendMail({
-        from: process.env.SMTP_FROM,
-        to: email,
-        subject: 'Your Login OTP',
-        html,
-      });
-      this.logger.log(`OTP email sent to ${email}`);
-    } catch (error) {
-      this.logger.error(`Failed to send OTP email to ${email}`, error);
-      throw error;
-    }
+    await this.sendEmail(email, 'Your Login OTP', html);
   }
 
   async sendPasswordResetEmail(email: string, token: string) {
@@ -95,21 +106,7 @@ export class EmailService {
 
     const html = resetPasswordTemplate(url, expiresIn);
 
-    try {
-      await this.transporter.sendMail({
-        from: process.env.SMTP_FROM,
-        to: email,
-        subject: 'Reset your password',
-        html,
-      });
-      this.logger.log(`Password reset email sent to ${email}`);
-    } catch (error) {
-      this.logger.error(
-        `Failed to send password reset email to ${email}`,
-        error,
-      );
-      throw error;
-    }
+    await this.sendEmail(email, 'Reset your password', html);
   }
 
   async sendWithdrawalVerificationEmail(
@@ -125,21 +122,11 @@ export class EmailService {
 
     const html = withdrawalVerificationTemplate(url, amount, currency);
 
-    try {
-      await this.transporter.sendMail({
-        from: process.env.SMTP_FROM,
-        to: email,
-        subject: 'Confirm your Withdrawal Request',
-        html,
-      });
-      this.logger.log(`Withdrawal verification email sent to ${email}`);
-    } catch (error) {
-      this.logger.error(
-        `Failed to send withdrawal verification email to ${email}`,
-        error,
-      );
-      throw error;
-    }
+    await this.sendEmail(
+      email,
+      'Confirm your withdrawal request',
+      html,
+    );
   }
 
   async sendTicketReplyNotification(
@@ -154,21 +141,11 @@ export class EmailService {
 
     const html = ticketReplyTemplate(ticketNumber, subject, dashboardUrl);
 
-    try {
-      await this.transporter.sendMail({
-        from: process.env.SMTP_FROM,
-        to: email,
-        subject: `New Reply on Ticket ${ticketNumber}`,
-        html,
-      });
-      this.logger.log(`Ticket reply notification sent to ${email}`);
-    } catch (error) {
-      this.logger.error(
-        `Failed to send ticket reply notification to ${email}`,
-        error,
-      );
-      throw error;
-    }
+    await this.sendEmail(
+      email,
+      `New Reply on Ticket ${ticketNumber}`,
+      html,
+    );
   }
 
   async sendTicketStatusNotification(
@@ -189,21 +166,11 @@ export class EmailService {
       dashboardUrl,
     );
 
-    try {
-      await this.transporter.sendMail({
-        from: process.env.SMTP_FROM,
-        to: email,
-        subject: `Ticket ${ticketNumber} Status Updated`,
-        html,
-      });
-      this.logger.log(`Ticket status notification sent to ${email}`);
-    } catch (error) {
-      this.logger.error(
-        `Failed to send ticket status notification to ${email}`,
-        error,
-      );
-      throw error;
-    }
+    await this.sendEmail(
+      email,
+      `Ticket ${ticketNumber} Status Updated to ${status}`,
+      html,
+    );
   }
 
   async sendFulfillmentStatusEmail(
@@ -226,20 +193,10 @@ export class EmailService {
       dashboardUrl,
     );
 
-    try {
-      await this.transporter.sendMail({
-        from: process.env.SMTP_FROM,
-        to: email,
-        subject: `Reward Update: ${rewardName}`,
-        html,
-      });
-      this.logger.log(`Fulfillment status email sent to ${email}`);
-    } catch (error) {
-      this.logger.error(
-        `Failed to send fulfillment status email to ${email}`,
-        error,
-      );
-      throw error;
-    }
+    await this.sendEmail(
+      email,
+      `Reward update: "${rewardName}"`,
+      html,
+    );
   }
 }
