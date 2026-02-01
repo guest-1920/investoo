@@ -36,13 +36,14 @@ export class AuthController {
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
+    @Req() req: any,
   ) {
     const authResult = await this.authService.login(
       loginDto.email,
       loginDto.password,
     );
 
-    this.setCookie(response, authResult.access_token);
+    this.setCookie(response, authResult.access_token, req);
     return {
       message: 'Login successful',
       user: authResult.user,
@@ -57,11 +58,12 @@ export class AuthController {
   async verifyEmail(
     @Body() body: { token: string },
     @Res({ passthrough: true }) response: Response,
+    @Req() req: any,
   ) {
     const result = await this.authService.verifyEmail(body.token);
 
     // Auto-login after verification
-    this.setCookie(response, result.access_token);
+    this.setCookie(response, result.access_token, req);
     return {
       message: 'Email verified successfully',
       user: result.user,
@@ -98,10 +100,17 @@ export class AuthController {
     return { message: 'Logged out successfully' };
   }
 
-  private setCookie(res: Response, token: string) {
+  private setCookie(res: Response, token: string, req?: any) {
+    // Intelligent Security
+    // If strict production AND not a VPN request -> Use Secure Cookie
+    // If VPN (admin/ internal IP) -> Allow HTTP Cookie
+
+    const host = req?.headers?.host || '';
+    const isVpnRequest = host.includes('admin') || host.includes('10.10.10');
+    const isSecure = process.env.NODE_ENV === 'production' && !isVpnRequest;
     res.cookie('access_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       sameSite: 'lax',
       maxAge: this.configService.get<number>('JWT_COOKIE_MAX_AGE') || 3600000,
     });
