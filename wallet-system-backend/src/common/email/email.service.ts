@@ -16,8 +16,8 @@ export class EmailService {
   private readonly logger = new Logger(EmailService.name);
 
   constructor(private readonly configService: ConfigService) {
-    this.apiKey = this.configService.get<string>('NITROMAIL_API_KEY');
-    this.apiUrl = this.configService.get<string>('NITROMAIL_API_URL');
+    this.apiKey = this.configService.get<string>('NITROMAIL_API_KEY') || '';
+    this.apiUrl = this.configService.get<string>('NITROMAIL_API_URL') || '';
   }
 
   private async sendEmail(to: string, subject: string, htmlBody: string){
@@ -56,7 +56,7 @@ export class EmailService {
       throw error;
     }
 
-   
+  }
 
 
   private formatDuration(seconds: number): string {
