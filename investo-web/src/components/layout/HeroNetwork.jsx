@@ -159,24 +159,34 @@ export default function HeroNetwork() {
                         Experience the precision of algorithmic portfolio management.
                         Investoo unifies global markets into a single, intelligent interface.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        {user ? (
-                            <Link to="/plans" className="px-8 py-4 bg-white hover:scale-105 shadow-[0_0_15px_rgba(255,255,255,0.3)]  text-black rounded-full  transition">
-                                Start Investing
-                            </Link>
-                        ) : (
-                            <Link to="/login" 
-                            state={{ from: {pathname: '/indexes'} }}
-                            className="px-8 py-4 bg-white hover:scale-105 shadow-[0_0_15px_rgba(255,255,255,0.3)]  text-black rounded-full  font-medium transition">
-                                Start Investing
-                            </Link>
-                        )}
-                        <button>
-                            <Link to="/methodology" className="px-8 py-4 bg-transparent hover:bg-white/20 text-white rounded-full  font-medium transition-all">
-                                View Methodology
-                            </Link>
-                        </button>
-                    </div>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-xs sm:max-w-none mx-auto">
+  {user ? (
+    <Link
+      to="/plans"
+      className="w-full sm:w-auto min-w-[220px] h-14 px-8 bg-white text-black font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:shadow-[0_0_25px_rgba(255,255,255,0.5)] text-center flex justify-center items-center"
+    >
+      Start Investing
+    </Link>
+  ) : (
+    <Link
+      to="/login"
+      state={{ from: { pathname: "/plans" } }}
+      className="w-full sm:w-auto min-w-[220px] h-14 px-8 bg-white text-black font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:shadow-[0_0_25px_rgba(255,255,255,0.5)] text-center flex justify-center items-center"
+    >
+      Start Investing
+    </Link>
+  )}
+
+  <button className="contents">
+    <Link
+      to="/methodology"
+      className="w-full sm:w-auto min-w-[220px] h-14 px-8 bg-white/5 border border-white/20 text-white font-semibold rounded-full hover:bg-white/10 transition-all backdrop-blur-sm text-center flex justify-center items-center"
+    >
+      View Methodology
+    </Link>
+  </button>
+</div>
+
                 </motion.div>
             </div>
 

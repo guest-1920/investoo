@@ -100,14 +100,14 @@ export default function Login() {
                         </Button>
                     </form>
 
-                    <div className="mt-8 text-center space-y-4">
+                    <div className="mt-8 text-center space-y-1">
                         <div>
                             <Link to="/forgot-password" className="text-sm text-white/40 hover:text-white transition-colors">
                                 Forgot Password?
                             </Link>
                         </div>
                         <p className="text-sm text-white/40">
-                            New User? <Link to="/register" className="text-white hover:underline font-medium">Sign Up</Link>
+                            New user? <Link to="/register" className="px-1 text-white hover:underline font-medium">Sign Up</Link>
                         </p>
                     </div>
                 </Card>

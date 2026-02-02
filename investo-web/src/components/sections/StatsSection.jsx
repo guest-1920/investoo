@@ -8,7 +8,7 @@ const stats = [
         variance: 0.0005, // Tuned for realistic daily growth
         interval: 2000,
         type: 'growth',
-        format: (v) => `$${v.toFixed(3)}M`
+        format: (v) => `$${v.toFixed(1)} M`
     },
     {
         label: "Active Investors",
@@ -20,7 +20,7 @@ const stats = [
     },
     {
         label: "Markets Covered",
-        start: 120,
+        start: 63,
         variance: 0.005, // Very slow, effectively stable for long periods
         interval: 5000,
         type: 'growth',
