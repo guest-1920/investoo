@@ -26,9 +26,6 @@
     "seed:daily": "ts-node scripts/seed-daily-returns.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.971.0",
-    "@aws-sdk/s3-presigned-post": "^3.971.0",
-    "@aws-sdk/s3-request-presigner": "^3.971.0",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
