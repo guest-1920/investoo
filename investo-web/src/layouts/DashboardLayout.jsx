@@ -75,7 +75,7 @@ export default function DashboardLayout() {
             >
                 {/* Brand */}
                 <div className="h-20 flex items-center px-6 border-b border-white/5">
-                    <div className="flex items-center gap-3">
+                    <Link to="/" className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded bg-white flex items-center justify-center">
                             <div className="w-4 h-4 rounded-full bg-black" />
                         </div>
@@ -83,7 +83,7 @@ export default function DashboardLayout() {
                             <span className="text-xl font-bold tracking-tight leading-none">Investoo</span>
                             <span className="text-[12px] font-medium text-white/50 tracking-wide camelcase transition-colors">Future Of Investing</span>
                         </div>
-                    </div>
+                    </Link>
                 </div>
 
                 {/* Nav Links */}

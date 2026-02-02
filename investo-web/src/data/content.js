@@ -392,10 +392,10 @@ export const PLATFORM_CONTENT = {
 };
 
 export const CAREERS_JOBS = [
-  { title: "Senior Rust Engineer", department: "Execution", location: "Remote / London", type: "Full-Time" },
-  { title: "Quantitative Researcher", department: "Alpha", location: "New York", type: "Full-Time" },
-  { title: "Product Designer", department: "Experience", location: "Remote", type: "Contract" },
-  { title: "Compliance Officer", department: "Legal", location: "Singapore", type: "Full-Time" }
+  //{ title: "Senior Rust Engineer", department: "Execution", location: "Remote / London", type: "Full-Time" },
+  //{ title: "Quantitative Researcher", department: "Alpha", location: "New York", type: "Full-Time" },
+  //{ title: "Product Designer", department: "Experience", location: "Remote", type: "Contract" },
+  //{ title: "Compliance Officer", department: "Legal", location: "Singapore", type: "Full-Time" }
 ];
 
 export const PRESS_RELEASES = [

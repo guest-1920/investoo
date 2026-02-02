@@ -13,7 +13,10 @@ export default function Careers() {
             </div>
 
             <div className="grid gap-6 max-w-4xl mx-auto">
-                {CAREERS_JOBS.map((job, idx) => (
+            
+                {CAREERS_JOBS.length ===0 ? (
+                    <p className="text-center text-white/50">We are not hiring at the moment. Please check back later.</p>
+                ) : CAREERS_JOBS.map((job, idx) => (
                     <Card key={idx} className="p-8 flex flex-col md:flex-row items-center justify-between gap-6 border-white/10 bg-[#0A0A0A]">
                         <div>
                             <h3 className="text-2xl font-bold text-white mb-2">{job.title}</h3>

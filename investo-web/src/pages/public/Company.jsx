@@ -3,6 +3,7 @@ import { COMPANY_CONTENT } from '../../data/content';
 import { Card } from '../../components/ui/Card';
 import { motion } from 'framer-motion';
 import { MapPin, Globe, Award, ShieldCheck } from 'lucide-react';
+import StatsSection from '../../components/sections/StatsSection';
 
 export default function Company() {
     return (
@@ -32,16 +33,9 @@ export default function Company() {
             </section>
 
             {/* Stats Strip */}
-            <section className="border-y border-white/5 bg-[#0A0A0A] mb-32">
-                <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-2 md:grid-cols-4 gap-12">
-                    {COMPANY_CONTENT.stats.map((stat, index) => (
-                        <div key={index} className="text-center md:text-left">
-                            <div className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tighter">{stat.value}</div>
-                            <div className="text-sm font-medium text-white/40 uppercase tracking-widest">{stat.label}</div>
-                        </div>
-                    ))}
-                </div>
-            </section>
+            <div className="mb-32">
+            <StatsSection />
+            </div>
 
             {/* Values */}
             <section className="px-6 max-w-7xl mx-auto mb-32">

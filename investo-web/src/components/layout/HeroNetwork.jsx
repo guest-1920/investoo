@@ -1,7 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import {useAuth} from "../../context/AuthContext";
 
 export default function HeroNetwork() {
+    const {user}=useAuth();
     const canvasRef = useRef(null);
 
     useEffect(() => {
@@ -144,7 +147,7 @@ export default function HeroNetwork() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, ease: "easeOut" }}
                 >
-                    <div className="inline-block px-3 py-1 mb-6 border border-white/10 rounded-full bg-white/5 backdrop-blur-sm">
+                    <div className="inline-block px-3 py-1 mb-6 border border-white/10 rounded-full bg-transparent backdrop-blur-sm">
                         <span className="text-xs font-semibold text-white/70 uppercase tracking-widest">
                             The Future of Investing
                         </span>
@@ -157,11 +160,21 @@ export default function HeroNetwork() {
                         Investoo unifies global markets into a single, intelligent interface.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button className="px-8 py-4 bg-white text-black font-semibold rounded-full hover:bg-white/90 transition-all hover:scale-105">
-                            Start Investing
-                        </button>
-                        <button className="px-8 py-4 bg-transparent border border-white/20 text-white font-semibold rounded-full hover:bg-white/5 transition-all">
-                            View Methodology
+                        {user ? (
+                            <Link to="/plans" className="px-8 py-4 bg-white hover:scale-105 shadow-[0_0_15px_rgba(255,255,255,0.3)]  text-black rounded-full  transition">
+                                Start Investing
+                            </Link>
+                        ) : (
+                            <Link to="/login" 
+                            state={{ from: {pathname: '/indexes'} }}
+                            className="px-8 py-4 bg-white hover:scale-105 shadow-[0_0_15px_rgba(255,255,255,0.3)]  text-black rounded-full  font-medium transition">
+                                Start Investing
+                            </Link>
+                        )}
+                        <button>
+                            <Link to="/methodology" className="px-8 py-4 bg-transparent hover:bg-white/20 text-white rounded-full  font-medium transition-all">
+                                View Methodology
+                            </Link>
                         </button>
                     </div>
                 </motion.div>

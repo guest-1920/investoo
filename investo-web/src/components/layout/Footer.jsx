@@ -1,5 +1,6 @@
 import React from 'react';
 import { Twitter, Linkedin, Facebook, Instagram } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Footer() {
     return (
@@ -8,7 +9,7 @@ export default function Footer() {
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10 mb-20">
                     {/* Brand Column */}
                     <div className="col-span-2 lg:col-span-2">
-                        <div className="flex items-center gap-3 mb-6">
+                        <Link to="/" className="flex items-center gap-3 mb-6">
                             <div className="w-8 h-8 rounded bg-white flex items-center justify-center">
                                 <div className="w-4 h-4 rounded-full bg-black" />
                             </div>
@@ -16,7 +17,7 @@ export default function Footer() {
                                 <span className="text-xl font-bold tracking-tight text-white leading-none">Investoo</span>
                                 <span className="text-[12px] font-medium text-white/50 tracking-wide camelcase mt-0.5">Future Of Investing</span>
                             </div>
-                        </div>
+                        </Link>
                         <p className="text-white/50 text-sm leading-relaxed max-w-sm mb-8">
                             Empowering the next generation of wealth with institutional-grade analytics, automated diversification, and premium asset access.
                         </p>

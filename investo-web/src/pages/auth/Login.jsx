@@ -17,10 +17,11 @@ export default function Login() {
 
     const navigate = useNavigate();
     const { user, setUser } = useAuth();
+    const from = location.state?.from?.pathname || '/dashboard';
 
     useEffect(() => {
         if (user) {
-            navigate('/dashboard', { replace: true });
+            navigate(from, { replace: true });
         }
     }, [user, navigate]);
 
@@ -33,7 +34,7 @@ export default function Login() {
             // Fetch full profile after login to get all user data including referralCode
             const profile = await authService.getProfile();
             setUser(profile);
-            navigate('/dashboard');
+            navigate(from, { replace: true });
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.message || 'Invalid credentials');
@@ -106,7 +107,7 @@ export default function Login() {
                             </Link>
                         </div>
                         <p className="text-sm text-white/40">
-                            New User? <Link to="/register" className="text-white hover:underline font-medium">Apply for Access</Link>
+                            New User? <Link to="/register" className="text-white hover:underline font-medium">Sign Up</Link>
                         </p>
                     </div>
                 </Card>
