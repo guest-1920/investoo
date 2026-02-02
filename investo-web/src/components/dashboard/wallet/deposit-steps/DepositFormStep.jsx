@@ -40,6 +40,8 @@ export default function DepositFormStep({
         } catch (err) {
             console.error(err);
             setError('Failed to upload proof. Please try again.');
+            setProofKey(''); // clear proofkey on upload failure
+            e.target.value = null; // clear file input
         } finally {
             setUploading(false);
         }
@@ -47,6 +49,16 @@ export default function DepositFormStep({
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // Prevent submission if there's an upload error or no proof uploaded
+        if(error || !proofKey)
+        {
+            if(!proofKey)
+            {
+                setError('Please upload a payment proof screenshot');
+            }
+            return;
+        }
         onSubmit(e);
     };
 
@@ -206,7 +218,12 @@ export default function DepositFormStep({
                         <p className="text-[10px] text-white/30">Upload a screenshot of your transaction confirmation. Max 10MB.</p>
                     </div>
 
-                    <Button type="submit" isLoading={isSubmitting} className="w-full py-4 text-sm font-bold">
+                    <Button 
+                        type="submit" 
+                        isLoading={isSubmitting} 
+                        disabled={ uploading || !!error || !proofKey}
+                        className="w-full py-4 text-sm font-bold"
+                    >
                         Proceed to Confirm
                     </Button>
                 </form>

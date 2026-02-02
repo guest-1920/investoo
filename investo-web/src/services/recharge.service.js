@@ -34,7 +34,7 @@ class RechargeService extends BaseService {
 
         // Upload directly to backend
         try {
-            const response = await client.post('/uploads', formData, {
+            const response = await client.post('/upload', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
