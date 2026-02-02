@@ -26,9 +26,9 @@ export default function DepositFormStep({
 
         setError(''); // Clear previous errors
 
-        // 5MB Limit Check
-        if (file.size > 5 * 1024 * 1024) {
-            setError('File size exceeds the 5MB limit. Please upload a smaller file.');
+        // 10MB Limit Check
+        if (file.size > 10 * 1024 * 1024) {
+            setError('File size exceeds the 10MB limit. Please upload a smaller file.');
             e.target.value = null; // Clear input
             return;
         }
@@ -203,7 +203,7 @@ export default function DepositFormStep({
                                 )}
                             </div>
                         </div>
-                        <p className="text-[10px] text-white/30">Upload a screenshot of your transaction confirmation. Max 5MB.</p>
+                        <p className="text-[10px] text-white/30">Upload a screenshot of your transaction confirmation. Max 10MB.</p>
                     </div>
 
                     <Button type="submit" isLoading={isSubmitting} className="w-full py-4 text-sm font-bold">

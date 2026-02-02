@@ -1,168 +1,212 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  S3Client,
-  GetObjectCommand,
-} from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
+import ClientStr from 'ssh2-sftp-client';
 import { v4 as uuidv4 } from 'uuid';
 import { createWorker } from 'tesseract.js';
+import * as crypto from 'crypto';
+import * as path from 'path';
+import * as fs from 'fs';
+import * as os from 'os';
+import sharp from 'sharp';
+
+// Fix for import issues depending on tsconfig
+const Client = ClientStr as unknown as typeof ClientStr;
 
 @Injectable()
 export class UploadService {
-  private s3Client: S3Client;
-  private bucketName: string;
+  private config: any;
+  private uploadPath: string;
+  private appUrl: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.bucketName = this.configService.getOrThrow<string>('AWS_BUCKET_NAME');
-    const region = this.configService.getOrThrow<string>('AWS_REGION');
-    const credentials = {
-      accessKeyId: this.configService.getOrThrow<string>('AWS_ACCESS_KEY_ID'),
-      secretAccessKey: this.configService.getOrThrow<string>(
-        'AWS_SECRET_ACCESS_KEY',
-      ),
+    this.uploadPath = this.configService.getOrThrow<string>('SFTP_UPLOAD_PATH');
+    this.appUrl = this.configService.getOrThrow<string>('APP_URL');
+    this.config = {
+      host: this.configService.getOrThrow<string>('SFTP_HOST'),
+      port: parseInt(this.configService.getOrThrow<string>('SFTP_PORT'), 10),
+      username: this.configService.getOrThrow<string>('SFTP_USER'),
+      password: this.configService.getOrThrow<string>('SFTP_PASS'),
+      algorithms: {
+        serverHostKey: ['ssh-rsa', 'ssh-dss'],
+        cipher: ['aes256-cbc', 'aes128-cbc', '3des-cbc'],
+        hmac: ['hmac-sha2-256', 'hmac-sha2-512', 'hmac-sha1'],
+        compress: ['none'],
+      },
     };
-
-    // Initialize S3 Client (compatible with AWS and other S3-compatible providers)
-    this.s3Client = new S3Client({
-      region,
-      credentials,
-      endpoint: this.configService.get<string>('AWS_ENDPOINT'), // Optional custom endpoint
-      forcePathStyle: true, // Needed for some S3-compatible providers
-    });
   }
 
-  async getPresignedUploadUrl(
-    userId: string,
-    contentType: string = 'image/jpeg',
-  ): Promise<{ url: string; fields: Record<string, string>; key: string }> {
-    const key = `proofs/${userId}/${uuidv4()}`;
+  private async getSftpClient(): Promise<ClientStr> {
+    const sftp = new ClientStr();
+    await sftp.connect(this.config);
+    return sftp;
+  }
 
+  async uploadFile(file: Express.Multer.File, userId: string): Promise<{ key: string; url: string }> {
+    let sftp: ClientStr | null = null;
     try {
-      const { url, fields } = await createPresignedPost(this.s3Client, {
-        Bucket: this.bucketName,
-        Key: key,
-        Conditions: [
-          ['content-length-range', 0, 5 * 1024 * 1024], // up to 5 MB
-          ['eq', '$Content-Type', contentType],
-        ],
-        Fields: {
-          'Content-Type': contentType,
-        },
-        Expires: 300, // 5 minutes
-      });
+      sftp = await this.getSftpClient();
+      const ext = path.extname(file.originalname);
+      const filename = `${uuidv4()}${ext}`;
+      // Organize by user ID to avoid massive directories
+      const remoteDir = `${this.uploadPath}/proofs/${userId}`;
+      const remotePath = `${remoteDir}/${filename}`;
+      const key = `proofs/${userId}/${filename}`; // Key stored in DB
 
-      return { url, fields, key };
+      // Ensure directory exists
+      const dirExists = await sftp.exists(remoteDir);
+      if (!dirExists) {
+        await sftp.mkdir(remoteDir, true);
+      }
+
+      await sftp.put(file.buffer, remotePath);
+      return { key, url: await this.generateSignedAccessUrl(key) };
     } catch (error) {
-      console.error('Error generating presigned upload URL:', error);
-      throw new InternalServerErrorException('Could not generate upload URL');
+      console.error('SFTP Upload Error:', error);
+      throw new InternalServerErrorException('Failed to upload file to storage');
+    } finally {
+      if (sftp) await sftp.end();
     }
   }
 
-  async getPresignedDownloadUrl(key: string): Promise<string> {
-    const command = new GetObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-    });
+  // Generates a URL that points to OUR backend (Verify Controller)
+  async generateSignedAccessUrl(key: string): Promise<string> {
+    const expires = Date.now() + 60 * 60 * 1000; // 60 mins
+    const signature = this.signUrl(key, expires);
+    // Encode components to ensure safety
+    return `${this.appUrl}/api/v1/upload/view?key=${encodeURIComponent(key)}&expires=${expires}&signature=${signature}`;
+  }
 
+  async getFileBuffer(key: string): Promise<{ buffer: Buffer; mimeType: string }> {
+    let sftp: ClientStr | null = null;
     try {
-      return await getSignedUrl(this.s3Client, command, { expiresIn: 900 }); // 15 minutes
+      sftp = await this.getSftpClient();
+      const remotePath = `${this.uploadPath}/${key}`;
+
+      const exists = await sftp.exists(remotePath);
+      if (!exists) {
+        throw new NotFoundException('File not found');
+      }
+
+      const buffer = await sftp.get(remotePath);
+      if (!Buffer.isBuffer(buffer)) {
+        throw new InternalServerErrorException('Failed to retrieve file buffer');
+      }
+
+      // Simple mime type deduction or default
+      const ext = path.extname(key).toLowerCase();
+      // Basic support for common image types
+      let mimeType = 'application/octet-stream';
+      if (ext === '.png') mimeType = 'image/png';
+      else if (ext === '.jpg' || ext === '.jpeg') mimeType = 'image/jpeg';
+      else if (ext === '.pdf') mimeType = 'application/pdf';
+
+      return { buffer, mimeType };
     } catch (error) {
-      console.error('Error generating presigned download URL:', error);
-      throw new InternalServerErrorException('Could not generate download URL');
+      console.error('SFTP Get Error:', error);
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to retrieve file');
+    } finally {
+      if (sftp) await sftp.end();
     }
   }
 
-  async scanS3Object(key: string): Promise<any[]> {
+  verifyUrlSignature(key: string, expires: number, signature: string): boolean {
+    const expected = this.signUrl(key, expires);
+    if (Date.now() > expires) return false;
+    return signature === expected;
+  }
+
+  private signUrl(key: string, expires: number): string {
+    // secure secret handling
+    const secret = this.configService.get<string>('JWT_SECRET', 'fallback-secret');
+    return crypto
+      .createHmac('sha256', secret)
+      .update(`${key}:${expires}`)
+      .digest('hex');
+  }
+
+  async scanStoredObject(key: string): Promise<any[]> {
+    let sftp: ClientStr | null = null;
     try {
-      // 1. Fetch the file buffer from S3
-      const command = new GetObjectCommand({
-        Bucket: this.bucketName,
-        Key: key,
-      });
+      sftp = await this.getSftpClient();
+      const remotePath = `${this.uploadPath}/${key}`;
 
-      const response = await this.s3Client.send(command);
-
-      if (!response.Body) {
-        throw new Error('Empty body in S3 object');
+      const buffer = await sftp.get(remotePath);
+      if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
+        throw new Error('File is empty or invalid');
       }
 
-      // Collect stream into a buffer
-      const byteArray = await response.Body.transformToByteArray();
-      const buffer = Buffer.from(byteArray);
+      // Preprocess image with Sharp for high-quality OCR
+      const tmpPath = path.join(os.tmpdir(), `ocr_${uuidv4()}.png`);
+      try {
+        const processed = await sharp(buffer)
+          .rotate() // Respect EXIF orientation
+          .resize(1200, null, { // Scale to 1200px width for better OCR quality
+            withoutEnlargement: false,
+            fastShrinkOnLoad: false
+          })
+          .png()
+          .toFile(tmpPath);
 
-      if (buffer.length === 0) {
-        throw new Error('File is empty (0 bytes)');
-      }
+        const imgWidth = processed.width;
+        const imgHeight = processed.height;
 
-      // 2. Initialize Tesseract Worker
-      const worker = await createWorker('eng');
+        // Initialize Tesseract Worker
+        const worker = await createWorker('eng');
+        const { data } = await worker.recognize(tmpPath);
 
-      // 3. Recognize text
-      const { data } = await worker.recognize(buffer);
-      const lines = data.blocks
-        ? data.blocks.flatMap((block) =>
-          block.paragraphs.flatMap((p) => p.lines),
-        )
-        : [];
+        await worker.terminate();
 
-      // Use a consistent way to determine image dimensions if possible.
-      // Tesseract.js typically handles geometry in pixels. To match Textract's 0-1 range,
-      // we need the image dimensions.
-      // Tesseract.js results don't always directly expose the source image dimensions easily in the data object
-      // without an extra step, but `lines` contains bbox data.
-      // We will ESTIMATE or standardise.
-      // Actually, let's just return the raw text if geometry is too hard, BUT
-      // the frontend relies on geometry.
-      // Workaround: We can't easily get dimensions without an image library. 
-      // HOWEVER, `bbox` in lines has x0, y0, x1, y1.
-      // We can infer the "max" width/height observed to normalize, OR
-      // we can trust that the bounding box is enough.
-      // WAIT: Textract returns `Geometry: { BoundingBox: { Width, Height, Left, Top } }` as RATIOS (0-1).
-      // Tesseract returns PIXELS.
-      // Frontend code: `left: ${Left * 100}%`.
-      // If we send pixels (e.g. Left=100) -> 10000% -> Broken UI.
-      // We MUST normalize.
-
-      // Feature: Check if Tesseract provides page dimensions.
-      // In recent versions, `data` includes `imageColor` etc? No.
-      // Let's use a trick: Max(x1) and Max(y1) from all words/lines approximates the width/height.
-      // It's not perfect but better than 0.
-
-      let maxX = 1;
-      let maxY = 1;
-
-      // Calculate extent from all lines (or words if we went deeper)
-      lines.forEach(line => {
-        if (line.bbox.x1 > maxX) maxX = line.bbox.x1;
-        if (line.bbox.y1 > maxY) maxY = line.bbox.y1;
-      });
-
-      // Add a small padding assumption or just use these as "image dimensions"
-      // It might be slightly smaller than real image but ensures boxes wrap tightly.
-      const imgWidth = maxX;
-      const imgHeight = maxY;
-
-      const results = lines.map(line => ({
-        text: line.text.trim(),
-        geometry: {
-          BoundingBox: {
-            Left: line.bbox.x0 / imgWidth,
-            Top: line.bbox.y0 / imgHeight,
-            Width: (line.bbox.x1 - line.bbox.x0) / imgWidth,
-            Height: (line.bbox.y1 - line.bbox.y0) / imgHeight
-          }
+        // Cleanup temp file
+        if (fs.existsSync(tmpPath)) {
+          fs.unlinkSync(tmpPath);
         }
-      })).filter(item => item.text.length > 0);
 
-      await worker.terminate();
+        // Try to extract structured lines with geometry
+        let lines: any[] = [];
+        if (data.blocks && data.blocks.length > 0) {
+          lines = data.blocks.flatMap((block: any) =>
+            block.paragraphs?.flatMap((p: any) => p.lines || []) || []
+          );
+        }
 
-      return results;
+        // If no structured data, fall back to splitting raw text
+        if (lines.length === 0 && data.text && data.text.trim().length > 0) {
+          const rawLines = data.text.split('\n').filter((l: string) => l.trim().length > 0);
+          return rawLines.map((text: string) => ({
+            text: text.trim(),
+            geometry: null // No bounding boxes available from raw text
+          }));
+        }
+
+        const results = lines.map((line: any) => ({
+          text: line.text.trim(),
+          geometry: line.bbox ? {
+            BoundingBox: {
+              Left: line.bbox.x0 / imgWidth,
+              Top: line.bbox.y0 / imgHeight,
+              Width: (line.bbox.x1 - line.bbox.x0) / imgWidth,
+              Height: (line.bbox.y1 - line.bbox.y0) / imgHeight
+            }
+          } : null
+        })).filter((item: any) => item.text.length > 0);
+
+        return results;
+
+      } catch (ocrProcessingError) {
+        // Cleanup on failure
+        if (fs.existsSync(tmpPath)) {
+          fs.unlinkSync(tmpPath);
+        }
+        console.error('OCR Pipeline Failed:', ocrProcessingError);
+        throw new InternalServerErrorException('Failed to extract text from document');
+      }
 
     } catch (error) {
-      console.error('Error processing document with Tesseract:', error);
+      console.error('Error processing document from SFTP:', error);
       throw new InternalServerErrorException('Could not scan document');
+    } finally {
+      if (sftp) await sftp.end();
     }
   }
 }

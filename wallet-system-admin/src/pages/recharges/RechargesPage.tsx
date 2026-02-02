@@ -363,15 +363,42 @@ export function RechargesPage() {
                                     </button>
                                 </div>
 
-                                {remarkModal.extractedData.length > 0 && (
+                                {remarkModal.extractedData.length > 0 && !remarkModal.extractedData.some(i => i.geometry) && (
                                     <div style={{
                                         marginBottom: '0.5rem',
-                                        fontSize: '0.85rem',
-                                        color: '#333'
+                                        maxHeight: '150px',
+                                        overflowY: 'auto',
+                                        border: '1px solid #ddd',
+                                        borderRadius: '4px',
+                                        padding: '8px',
+                                        backgroundColor: '#f9f9f9'
                                     }}>
-                                        <small className="text-muted">
-                                            Text extracted. Please select the distinct transaction segments from the image.
+                                        <small style={{ display: 'block', marginBottom: '4px', color: '#666', fontSize: '0.75rem' }}>
+                                            Click text to append to Transaction ID:
                                         </small>
+                                        {remarkModal.extractedData.map((item, idx) => (
+                                            <div
+                                                key={idx}
+                                                onClick={() => setRemarkModal(prev => ({ 
+                                                    ...prev, 
+                                                    transactionId: prev.transactionId? prev.transactionId + item.text : item.text 
+                                                }))}
+                                                style={{ 
+                                                    padding: '4px 8px',
+                                                    margin: '2px 0',
+                                                    cursor: 'pointer',
+                                                    borderRadius: '3px',
+                                                    backgroundColor: '#fff',
+                                                    border: '1px solid #eee',
+                                                    fontSize: '0.85rem',
+                                                    fontFamily: 'monospace'
+                                                }}
+                                                className="hover:bg-blue-50"
+                                                title="Click to append to Transaction ID"
+                                            >
+                                                {item.text}
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
 
@@ -458,11 +485,6 @@ export function RechargesPage() {
                                         );
                                     })}
                                 </div>
-                            </div>
-                            <div style={{ marginTop: '10px', fontSize: '0.8rem', color: '#666', textAlign: 'center' }}>
-                                {remarkModal.extractedData.length > 0
-                                    ? "Click highlighted boxes to copy text."
-                                    : "Click 'Scan Proof' to extract text."}
                             </div>
                         </div>
                     )}

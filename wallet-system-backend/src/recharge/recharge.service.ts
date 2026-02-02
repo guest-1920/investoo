@@ -25,7 +25,7 @@ export class RechargeService {
     private readonly uploadService: UploadService,
     private readonly dataSource: DataSource,
     private readonly settingsService: SettingsService,
-  ) {}
+  ) { }
 
   /**
    * USER: Create a recharge request
@@ -142,7 +142,7 @@ export class RechargeService {
     if (!recharge) {
       throw new NotFoundException('Recharge not found');
     }
-    return this.uploadService.scanS3Object(recharge.proofKey);
+    return this.uploadService.scanStoredObject(recharge.proofKey);
   }
 
   /**
@@ -161,7 +161,7 @@ export class RechargeService {
     // Sign URLs
     const dataWithSignedUrls = await Promise.all(
       data.map(async (item) => {
-        const url = await this.uploadService.getPresignedDownloadUrl(
+        const url = await this.uploadService.generateSignedAccessUrl(
           item.proofKey,
         );
         return { ...item, proofUrl: url };
@@ -196,7 +196,7 @@ export class RechargeService {
     // Sign URLs
     const dataWithSignedUrls = await Promise.all(
       data.map(async (item) => {
-        const url = await this.uploadService.getPresignedDownloadUrl(
+        const url = await this.uploadService.generateSignedAccessUrl(
           item.proofKey,
         );
         return { ...item, proofUrl: url };
@@ -228,7 +228,7 @@ export class RechargeService {
     // Sign URLs
     const dataWithSignedUrls = await Promise.all(
       data.map(async (item) => {
-        const url = await this.uploadService.getPresignedDownloadUrl(
+        const url = await this.uploadService.generateSignedAccessUrl(
           item.proofKey,
         );
         return { ...item, proofUrl: url };

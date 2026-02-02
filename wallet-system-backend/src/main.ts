@@ -16,8 +16,18 @@ async function bootstrap() {
   // SECURITY CONFIGURATION
   // ============================================
 
-  // Helmet - Security headers
-  app.use(helmet());
+  // Helmet - Security headers with CSP configured for images
+  app.use((req, res, next) => {
+    // Skip Helmet entirely for file viewing (allows images to render in cross-origin contexts)
+    if (req.path.includes('/upload/view')) {
+      return next();
+    }
+    // Use Helmet for all other routes with relaxed CSP for images
+    return helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      contentSecurityPolicy: false, // Disable CSP for now (can be fine-tuned later)
+    })(req, res, next);
+  });
 
   // Cookie parser
   app.use(cookieParser());
