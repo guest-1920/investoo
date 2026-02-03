@@ -3,9 +3,9 @@ import { WindowsModule } from './windows/windows.module';
 import { RewardsModule } from './rewards/rewards.module';
 import { FulfillmentsModule } from './fulfillments/fulfillments.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { UsersModule } from 'src/users/users.module';
 
 import { ReferralsController } from './referrals.controller';
-import { UsersService } from 'src/users/users.service';
 
 
 @Module({
@@ -14,8 +14,8 @@ import { UsersService } from 'src/users/users.service';
         RewardsModule,
         FulfillmentsModule,
         AddressesModule,
+        UsersModule,
     ],
-    providers: [UsersService],
     controllers: [ReferralsController],
     exports: [
         WindowsModule,
