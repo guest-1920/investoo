@@ -1,14 +1,17 @@
-import { Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Inject } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ReferralWindowService } from './windows/windows.service';
 import { FulfillmentsService } from './fulfillments/fulfillments.service';
 import { FulfillmentStatus } from './fulfillments/entities/reward-fulfillment.entity';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('referrals')
 @UseGuards(JwtAuthGuard)
 export class ReferralsController {
     constructor(
         private readonly windowService: ReferralWindowService,
+        @Inject(UsersService)
+        private readonly usersService: UsersService,
         private readonly fulfillmentService: FulfillmentsService,
     ) { }
 
@@ -25,13 +28,18 @@ export class ReferralsController {
         // pendingRewards: count fulfillments with status PENDING
         const pendingRewards = fulfillments.data.filter(f => f.status === FulfillmentStatus.PENDING).length;
 
+        // Count direct referrals (level 1) and total referrals (up to 10 levels)
+        const directReferrals = await this.usersService.countDirectReferrals(userId);
+        const totalReferrals = await this.usersService.countTotalReferrals(userId);
+
         // totalEarned: sum of DELIVERED rewards value (simplified)
         const totalEarned = fulfillments.data
             .filter(f => f.status === 'DELIVERED')
             .reduce((sum, f) => sum + (Number(f.reward?.value) || 0), 0);
 
         return {
-            totalReferrals: 0, // Need UsersService to count this, skipping for now to avoid complexity
+            directReferrals,
+            totalReferrals,
             totalEarned,
             pendingRewards,
         };
