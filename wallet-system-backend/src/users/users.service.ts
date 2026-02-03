@@ -140,29 +140,28 @@ export class UsersService {
    */
   async countTotalReferrals(userId: string): Promise<number> {
     const result = await this.usersRepo
-      .createQueryBuilder('u')
-      .select('COUNT(DISTINCT cte.id)', 'count')
+      .createQueryBuilder()
+      .select('COUNT(DISTINCT cte."id")', 'count')
       .addCommonTableExpression(
         `
         WITH RECURSIVE referral_tree AS (
           -- Base case: direct referrals of the user
-          SELECT id, referredBy, 1 as level
+          SELECT "id", "referredBy", 1 as level
           FROM "users"
-          WHERE "referredBy" = :userId AND "deleted" = false
+          WHERE "referredBy" = :userId AND "deletedAt" IS NULL
           
           UNION ALL
           
           -- Recursive case: referrals of referrals up to level 10
-          SELECT u.id, u."referredBy", rt.level + 1
-          FROM "users" u
-          INNER JOIN referral_tree rt ON u."referredBy" = rt.id
-          WHERE rt.level < 10 AND u."deleted" = false
+          SELECT "u"."id", "u"."referredBy", rt."level" + 1
+          FROM "users" "u"
+          INNER JOIN referral_tree rt ON "u"."referredBy" = rt."id"
+          WHERE rt."level" < 10 AND "u"."deletedAt" IS NULL
         )
-        SELECT DISTINCT id FROM referral_tree
+        SELECT * FROM referral_tree
         `,
         'cte',
       )
-      .where('1=1') // Placeholder to use the CTE
       .setParameter('userId', userId)
       .getRawOne();
 
