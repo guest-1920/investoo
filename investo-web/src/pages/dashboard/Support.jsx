@@ -354,14 +354,14 @@ export default function Support() {
                         </div>
                     </Card>
 
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                    {/* <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                         <h4 className="font-bold text-white text-sm mb-2">FAQ Highlights</h4>
                         <ul className="space-y-2 text-xs text-white/50">
                             <li className="hover:text-white cursor-pointer transition-colors">• How long do withdrawals take?</li>
                             <li className="hover:text-white cursor-pointer transition-colors">• How works the affiliate program?</li>
                             <li className="hover:text-white cursor-pointer transition-colors">• Resetting 2FA credentials</li>
                         </ul>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </div>
