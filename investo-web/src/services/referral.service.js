@@ -65,6 +65,7 @@ export const referralService = {
             // Fallback mock if endpoint doesn't exist yet
             console.warn('Referral stats endpoint missing, using mock data');
             return {
+                directReferrals: 0,
                 totalReferrals: 0,
                 totalEarned: 0,
                 pendingRewards: 0
