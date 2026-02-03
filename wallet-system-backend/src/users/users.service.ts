@@ -125,6 +125,51 @@ export class UsersService {
   }
 
   /**
+   * Count direct referrals (level 1 only)
+   * Only counts users directly referred by this user
+   */
+  async countDirectReferrals(userId: string): Promise<number> {
+    return this.usersRepo.count({
+      where: { referredBy: userId, deleted: false },
+    });
+  }
+
+  /**
+   * Count total referrals up to 10 levels using recursive CTE
+   * User is at level 0, direct referrals are level 1, their referrals are level 2, etc.
+   */
+  async countTotalReferrals(userId: string): Promise<number> {
+    const result = await this.usersRepo
+      .createQueryBuilder('u')
+      .select('COUNT(DISTINCT cte.id)', 'count')
+      .addCommonTableExpression(
+        `
+        WITH RECURSIVE referral_tree AS (
+          -- Base case: direct referrals of the user
+          SELECT id, referredBy, 1 as level
+          FROM "users"
+          WHERE "referredBy" = :userId AND "deleted" = false
+          
+          UNION ALL
+          
+          -- Recursive case: referrals of referrals up to level 10
+          SELECT u.id, u."referredBy", rt.level + 1
+          FROM "users" u
+          INNER JOIN referral_tree rt ON u."referredBy" = rt.id
+          WHERE rt.level < 10 AND u."deleted" = false
+        )
+        SELECT DISTINCT id FROM referral_tree
+        `,
+        'cte',
+      )
+      .where('1=1') // Placeholder to use the CTE
+      .setParameter('userId', userId)
+      .getRawOne();
+
+    return parseInt(result?.count || '0', 10);
+  }
+
+  /**
    * Get referral statistics for a user
    * Returns total earnings from referral bonuses, active referral count, and commission history
    */

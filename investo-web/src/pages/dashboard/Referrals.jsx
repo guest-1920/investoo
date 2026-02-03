@@ -15,7 +15,7 @@ const Referrals = () => {
     const [activeWindows, setActiveWindows] = useState([]);
     const [myProgress, setMyProgress] = useState([]);
     const [pendingClaims, setPendingClaims] = useState([]);
-    const [referralStats, setReferralStats] = useState({ totalReferrals: 0, totalEarned: 0, pendingRewards: 0 });
+    const [referralStats, setReferralStats] = useState({ directReferrals: 0, totalReferrals: 0, totalEarned: 0, pendingRewards: 0 });
     const [loading, setLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [selectedReward, setSelectedReward] = useState(null);
@@ -42,7 +42,7 @@ const Referrals = () => {
         return () => {
             if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
         };
-    }, [location.state]);
+    }, [location.state?.justPurchased]);
 
     const startPolling = () => {
         if (pollIntervalRef.current) return;
@@ -86,7 +86,7 @@ const Referrals = () => {
             if (results[0].status === 'fulfilled') setActiveWindows(results[0].value || []);
             if (results[1].status === 'fulfilled') setMyProgress(results[1].value || []);
             if (results[2].status === 'fulfilled') setPendingClaims(results[2].value || []);
-            if (results[3].status === 'fulfilled') setReferralStats(results[3].value || { totalReferrals: 0, totalEarned: 0, pendingRewards: 0 });
+            if (results[3].status === 'fulfilled') setReferralStats(results[3].value || { directReferrals: 0, totalReferrals: 0, totalEarned: 0, pendingRewards: 0 });
 
         } catch (error) {
             console.error('Failed to fetch referral data', error);
@@ -137,11 +137,23 @@ const Referrals = () => {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="p-5">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-white/5 text-white/60 flex items-center justify-center border border-white/10">
                             <Users size={22} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] text-white/40 uppercase tracking-wider font-bold mb-1">Direct Referrals</p>
+                            <p className="text-2xl font-bold text-white">{referralStats.directReferrals}</p>
+                        </div>
+                    </div>
+                </Card>
+
+                <Card className="p-5">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-white/5 text-white/60 flex items-center justify-center border border-white/10">
+                            <Trophy size={22} />
                         </div>
                         <div>
                             <p className="text-[10px] text-white/40 uppercase tracking-wider font-bold mb-1">Total Referrals</p>
