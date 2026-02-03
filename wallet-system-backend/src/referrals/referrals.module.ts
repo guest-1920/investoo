@@ -5,6 +5,10 @@ import { FulfillmentsModule } from './fulfillments/fulfillments.module';
 import { AddressesModule } from './addresses/addresses.module';
 
 import { ReferralsController } from './referrals.controller';
+import { ReferralWindowService } from './windows/windows.service';
+import { FulfillmentsService as ReferralFulfillmentService } from './fulfillments/fulfillments.service';
+import { UsersService } from 'src/users/users.service';
+
 
 @Module({
     imports: [
@@ -12,6 +16,9 @@ import { ReferralsController } from './referrals.controller';
         RewardsModule,
         FulfillmentsModule,
         AddressesModule,
+        ReferralWindowService,
+        ReferralFulfillmentService,
+        UsersService,
     ],
     controllers: [ReferralsController],
     exports: [
