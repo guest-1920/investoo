@@ -1,0 +1,202 @@
+github password-NicholasHarryMichael
+github_username-guest-1920
+coudflarePassword- NicholasHarryMichael@69
+proton mail password: Investoo6969@.
+FTP_Password: C6vC*vfryI9gqp1%
+
+##################################################
+How to use: https://nitromail.io/how-to-use
+App: https://nitromail.app
+Email: investoo69@proton.me
+Password: z85h4rPg3Y
+##################################################
+
+github ssh public key - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDfZkWWYkr7wWHvfGLMe+2mOAMyT5mK5gWf98ZfrPD5aHKHLz1vzrNoHnO1piIzzIwae4tpCoG8g8ntBMNReeJ/9TwhUiJdtJ8PgTx/oAg2KCkftMuzyPFX+W4pEwYzrL8k/9lX4I1H9tBjUerin1uSW8pcc9+76k+b4iqq1nToxd/y85BKDnFi+i3vZwpHQdV2B8IZw7A7WNOobRiV51rRklpLJU+HW349i+/Ga48Xf9tncCY4iNxoAPd0dDH7f96DsTyeUkK7shAwnG/7DDldY6ZooLutaLYdgmaRLrwh1Fu2lFl6FYaBixR+f+tBW8VXFqnqpg82nKrSCxfyhMR3EtEcZVJsu/bj3uvkxiEJf7qiTVt/ZulRkPJUyBDkIMZE/OWHzKS3ovcBbKgqr+3XwxlrDCJmfARwg6u34S/T32ZP1Jif7xgx9E4XXCLfSptaRvy8DE+wbpMQy0kMpQxyu4t1SdxThtWHcKSWK8AlIVHAUxDUZ7IMbNhGF0tbSj1uKXzlVIQJjk0zsMxG1iNFXTNaVs8fh2nY+q/eknTb0e7raKzCYEFCitbmXQyzv1ZjhuSt/of3mGV4/IUE06ipq2lhixm1lBziRE/DW/Z8rQOIf0FqXWQW6dwO2eU1JXwML/Ju7mpu0w0iVGwjfKjP4YIgVNSTJcAoJyzmxCPHAw== investoo69@proton.me
+
+###################################
+backend/.env:
+#####################################################################################################################################
+NODE_ENV=production
+PORT=3000
+
+#DATABASE
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_USER=investo_user
+DB_PASS=StrongAdminPass12369investooharrymichaelnicholas
+DB_NAME=investo_db
+DB_POOL_SIZE=200
+
+#SECURTIY
+JWT_SECRET=dasflkkjdsalkfjlasd;fjlaskdl;dksjaflkjasdf23424jkkl
+JWT_EXPIRES_IN=1H
+JWT_COOKIE_MAX_AGE=3600000
+AUTH_VERIFICATION_TOKEN_TTL=3600
+AUTH_OTP_TTL=300
+AUTH_RESET_TOKEN_TTL=300
+
+DAILY_RETURNS_CRON=0 1 * * *
+
+THROTTLE_TTL=60000
+THROTTLE_LIMIT=60
+
+FRONTEND_URL=http://investoo.net/
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+ALLOWED_ORIGINS=https://investoo.net,https://www.investoo.net,http://10.10.10.1
+
+#AWS
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_REGION=us-east-1
+AWS_BUCKET_NAME=
+
+#MAIL
+SMTP_HOST=nitromail.online
+SMTP_PORT=587
+SMTP_USER=investoo69-proton-me/bronze-plan
+SMTP_PASS=MP0gfben5xwqsG7rWnX07D2Z
+SMTP_SECURITY=STARTTLS
+SMTP_TLS=STARTTLS
+SMTP_FROM=noreply@investoo.net
+
+#NITROMAIL
+NITROMAIL_API_KEY=SxzPJgTyeFkSU6eybB8UJth2
+NITROMAIL_API_URL=https://nitromail.online/api/v1/send/message
+
+# ================================
+# VIRTUALINE CONFIG (SFTP & Textract)
+# ================================
+# Storage Type forced to sftp
+STORAGE_TYPE=sftp
+SFTP_HOST=130.12.180.13
+SFTP_PORT=22
+SFTP_USER=investoo
+SFTP_PASS=C6vC*vfryI9gqp1%
+SFTP_UPLOAD_PATH=/var/www/vhosts/investoo.net/httpdocs/uploads
+APP_URL=http://localhost:3000
+
+#######################################################################################################
+
+#######################################################################################################
+#### /etc/nginx/sites-available/investoo:
+
+#PERFORMANCE TUNING
+#gzip on;
+#gzip_types text/plain text/css application/json application/javascript;
+
+
+# --- BACKEND API (PUBLIC - Cloudflare Only) ---
+server {
+        server_name api.investoo.net;
+
+        #REJECT anyone not CloudFlare
+        ssl_client_certificate /etc/nginx/certs/cloudflare.pem;
+        ssl_verify_client on;
+
+        location / {
+                proxy_pass http://localhost:3000;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+        }
+
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/investoo.net/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/investoo.net/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+# --- CLIENT FRONTEND (Public - Cloudflare Only) ---
+server{
+        server_name investoo.net www.investoo.net;
+        root /var/www/investoo/investoo/investo-web/dist;
+        index index.html;
+
+        location ~*.\.(jpg|css|js)$ {expires 30d; }
+        location / { try_files $uri $uri/ /index.html;}
+
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/investoo.net/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/investoo.net/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+
+# --- ADMIN PANEL (PRIVATE - VPN ONLY) ---
+server{
+        listen 10.10.10.1:80; #only listens on VPN
+        server_name admin.investoo.net;
+
+        root /var/www/investoo/investoo/wallet-system-admin/dist;
+        index index.html;
+        location / { try_files $uri $uri/ /index.html; }
+
+        # INTERNAL PROXY: Handle API calls inside the VPN
+        location /api/v1 {
+                proxy_pass http://localhost:3000;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_set_header Host $host;
+        }
+}
+
+
+server{
+    if ($host = www.investoo.net) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = investoo.net) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+        server_name investoo.net www.investoo.net;
+    listen 80;
+    return 404; # managed by Certbot
+
+
+
+
+}
+server {
+    if ($host = api.investoo.net) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+        server_name api.investoo.net;
+    listen 80;
+    return 404; # managed by Certbot
+
+
+}
+
+########################################################################################################################
+Wireguardtunnel configuration:
+------------------------------
+[Interface]
+PrivateKey = qNuIaX5ZYeomEHdNg869VpCYbt1mG1sx+yP2s+QZ6lA=
+Address = 10.10.10.2/24
+DNS = 1.1.1.1
+MTU = 1360
+
+[Peer]
+PublicKey = VdAEZvb9n6x6I4NhaNJPfswCb8wl/Gnrp691+qxqSmI=
+AllowedIPs = 10.10.10.0/24
+Endpoint = 158.94.211.241:51820
+
+
+
+
+
