@@ -139,33 +139,28 @@ export class UsersService {
    * User is at level 0, direct referrals are level 1, their referrals are level 2, etc.
    */
   async countTotalReferrals(userId: string): Promise<number> {
-    const result = await this.usersRepo
-      .createQueryBuilder()
-      .select('COUNT(DISTINCT cte."id")', 'count')
-      .addCommonTableExpression(
-        `
-        WITH RECURSIVE referral_tree AS (
-          -- Base case: direct referrals of the user
-          SELECT "id", "referredBy", 1 as level
-          FROM "users"
-          WHERE "referredBy" = :userId AND "deletedAt" IS NULL
-          
-          UNION ALL
-          
-          -- Recursive case: referrals of referrals up to level 10
-          SELECT "u"."id", "u"."referredBy", rt."level" + 1
-          FROM "users" "u"
-          INNER JOIN referral_tree rt ON "u"."referredBy" = rt."id"
-          WHERE rt."level" < 10 AND "u"."deletedAt" IS NULL
-        )
-        SELECT * FROM referral_tree
-        `,
-        'cte',
+    const result = await this.usersRepo.query(
+      `
+      WITH RECURSIVE referral_tree AS (
+        -- Base case: direct referrals of the user
+        SELECT "id", "referredBy", 1 as level
+        FROM "users"
+        WHERE "referredBy" = $1 AND "deletedAt" IS NULL
+        
+        UNION ALL
+        
+        -- Recursive case: referrals of referrals up to level 10
+        SELECT "u"."id", "u"."referredBy", rt."level" + 1
+        FROM "users" "u"
+        INNER JOIN referral_tree rt ON "u"."referredBy" = rt."id"
+        WHERE rt."level" < 10 AND "u"."deletedAt" IS NULL
       )
-      .setParameter('userId', userId)
-      .getRawOne();
+      SELECT COUNT(DISTINCT "id") as "count" FROM referral_tree
+      `,
+      [userId],
+    );
 
-    return parseInt(result?.count || '0', 10);
+    return parseInt(result?.[0]?.count || '0', 10);
   }
 
   /**
