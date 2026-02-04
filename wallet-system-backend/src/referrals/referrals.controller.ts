@@ -3,7 +3,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ReferralWindowService } from './windows/windows.service';
 import { FulfillmentsService } from './fulfillments/fulfillments.service';
 import { FulfillmentStatus } from './fulfillments/entities/reward-fulfillment.entity';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 
 @Controller('referrals')
 @UseGuards(JwtAuthGuard)
