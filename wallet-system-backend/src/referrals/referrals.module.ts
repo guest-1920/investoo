@@ -3,7 +3,7 @@ import { WindowsModule } from './windows/windows.module';
 import { RewardsModule } from './rewards/rewards.module';
 import { FulfillmentsModule } from './fulfillments/fulfillments.module';
 import { AddressesModule } from './addresses/addresses.module';
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from '../users/users.module';
 
 import { ReferralsController } from './referrals.controller';
 
