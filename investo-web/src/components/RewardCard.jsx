@@ -52,6 +52,15 @@ const RewardCard = ({ reward, onClaim, isClaimable, claimButtonText = 'Claim Rew
                             {reward.value.toLocaleString()} USDT
                         </div>
                     </div>
+
+                    {isClaimable && (
+                        <button
+                            onClick={onClaim}
+                            className="px-4 py-2 bg-white text-black text-xs font-bold uppercase tracking-wide rounded-lg hover:bg-white/90 transition-colors"
+                        >
+                            {claimButtonText}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
