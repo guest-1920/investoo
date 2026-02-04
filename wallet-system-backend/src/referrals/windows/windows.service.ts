@@ -12,6 +12,7 @@ import {
     WindowProgressCompletedEvent,
     WindowProgressExpiredEvent,
 } from '../../common/events/domain-events';
+import { Subscription } from '../../subscriptions/subscription.entity';
 
 @Injectable()
 export class ReferralWindowService {
@@ -22,6 +23,8 @@ export class ReferralWindowService {
         private windowRepo: Repository<ReferralWindow>,
         @InjectRepository(ReferralWindowProgress)
         private progressRepo: Repository<ReferralWindowProgress>,
+        @InjectRepository(Subscription)
+        private subscriptionRepo: Repository<Subscription>,
         private readonly eventEmitter: EventEmitter2,
     ) { }
 
@@ -31,7 +34,7 @@ export class ReferralWindowService {
      * 1. Find all active global windows.
      * 2. For each window, check if the referee's purchase amount >= window's minPurchaseAmount.
      * 3. If qualified, find or create progress for the referrer.
-     * 4. Update progress (increment count).
+     * 4. Update progress (increment count) - ONLY if this is the referee's FIRST plan purchase.
      * 5. Check if window target is met.
      */
     async processQualifiedReferral(data: {
@@ -42,6 +45,20 @@ export class ReferralWindowService {
     }) {
         const { referrerId, refereeId, planPrice } = data;
         this.logger.log(`Processing referral for referrer ${referrerId}, price: ${planPrice}`);
+
+        // Check if this is the referee's first subscription
+        // If they already have other subscriptions, this is not their first purchase
+        const previousSubscriptions = await this.subscriptionRepo.count({
+            where: {
+                userId: refereeId,
+            },
+        });
+
+        // If referee has more than 1 subscription (including this one), it's not their first purchase
+        if (previousSubscriptions > 1) {
+            this.logger.debug(`Referee ${refereeId} already has ${previousSubscriptions} subscriptions, not counting as new referral`);
+            return;
+        }
 
         // 1. Fetch active windows
         // TODO: optimization - cache this
@@ -297,4 +314,3 @@ export class ReferralWindowService {
         return progressList;
     }
 }
-

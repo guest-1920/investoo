@@ -1,83 +1,27 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useMotionValue, animate } from 'framer-motion';
+import client from '../../api/client';
 
-const stats = [
-    {
-        label: "Assets Under Management",
-        start: 12.150,
-        variance: 0.0005, // Tuned for realistic daily growth
-        interval: 2000,
-        type: 'growth',
-        format: (v) => `$${v.toFixed(1)} M`
-    },
-    {
-        label: "Active Investors",
-        start: 42000,
-        variance: 1, // steady organic user growth
-        interval: 3000,
-        type: 'growth',
-        format: (v) => `${Math.floor(v).toLocaleString()}`
-    },
-    {
-        label: "Markets Covered",
-        start: 63,
-        variance: 0.005, // Very slow, effectively stable for long periods
-        interval: 5000,
-        type: 'growth',
-        format: (v) => `${Math.floor(v)}`
-    },
-    {
-        label: "Average Yield",
-        start: 8.42,
-        variance: 0.04, // Fluctuation range
-        interval: 2500,
-        type: 'fluctuation',
-        format: (v) => `${v.toFixed(2)}%`
-    },
-];
-
-const AnimatedStat = ({ start, label, variance, interval, type = 'growth', format }) => {
-    const value = useMotionValue(start);
+const AnimatedStat = ({ value, label, format }) => {
+    const displayValue = useMotionValue(0);
     const ref = useRef(null);
 
     useEffect(() => {
-        let currentTarget = start;
-
-        const timer = setInterval(() => {
-            let change;
-
-            if (type === 'fluctuation') {
-                // Random walk: -0.5 to 0.5 * variance
-                // This simulates market volatility around the average
-                change = (Math.random() - 0.5) * variance;
-
-                // optional: add slight gravitational pull to start to prevent extreme drift?
-                // currentTarget += change + (start - currentTarget) * 0.05
-                // For simple visuals, pure random walk is acceptable
-            } else {
-                // Strict growth for cumulative metrics
-                change = Math.random() * variance;
-            }
-
-            currentTarget += change;
-
-            animate(value, currentTarget, {
-                duration: interval / 1000,
-                ease: "linear"
-            });
-        }, interval);
-
-        return () => clearInterval(timer);
-    }, [start, variance, interval, value, type]);
+        const controls = animate(displayValue, value, {
+            duration: 1.5,
+            ease: "easeOut"
+        });
+        return controls.stop;
+    }, [value]);
 
     useEffect(() => {
-        const unsubscribe = value.on("change", (latest) => {
+        const unsubscribe = displayValue.on("change", (latest) => {
             if (ref.current) {
                 ref.current.textContent = format(latest);
             }
         });
         return unsubscribe;
-    }, [value, format]);
+    }, [displayValue, format]);
 
     return (
         <div className="px-4">
@@ -85,7 +29,7 @@ const AnimatedStat = ({ start, label, variance, interval, type = 'growth', forma
                 ref={ref}
                 className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tighter tabular-nums"
             >
-                {format(start)}
+                {format(value)}
             </div>
             <div className="text-sm font-medium text-white/40 uppercase tracking-widest">
                 {label}
@@ -95,11 +39,65 @@ const AnimatedStat = ({ start, label, variance, interval, type = 'growth', forma
 };
 
 export default function StatsSection() {
+    const [stats, setStats] = useState(null);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const { data } = await client.get('/stats');
+                setStats(data);
+            } catch (error) {
+                console.error('Failed to fetch stats:', error);
+            }
+        };
+
+        // Initial fetch
+        fetchStats();
+
+        // Poll for updates every 5 seconds to match backend cron
+        const intervalId = setInterval(fetchStats, 5000);
+
+        return () => clearInterval(intervalId);
+    }, []);
+
+    if (!stats) {
+        return (
+            <section className="py-24 border-y border-white/5 bg-zinc-950/50">
+                <div className="max-w-7xl mx-auto px-6 h-32 flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                </div>
+            </section>
+        );
+    }
+
+    const statsConfig = [
+        {
+            label: "Assets Under Management",
+            value: stats.aum,
+            format: (v) => `$${v.toFixed(2)}M`
+        },
+        {
+            label: "Active Investors",
+            value: stats.activeInvestors,
+            format: (v) => `${Math.floor(v).toLocaleString()}`
+        },
+        {
+            label: "Markets Covered",
+            value: stats.marketsCovered,
+            format: (v) => `${Math.floor(v)}`
+        },
+        {
+            label: "Average Yield",
+            value: stats.averageYield,
+            format: (v) => `${v.toFixed(2)}%`
+        },
+    ];
+
     return (
         <section className="py-24 border-y border-white/5 bg-zinc-950/50">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center divide-x divide-white/5">
-                    {stats.map((stat, i) => (
+                    {statsConfig.map((stat, i) => (
                         <AnimatedStat key={i} {...stat} />
                     ))}
                 </div>

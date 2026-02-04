@@ -21,6 +21,7 @@ import { SettingsModule } from './common/settings/settings.module';
 import { SupportModule } from './support/support.module';
 import { ReferralsModule } from './referrals/referrals.module';
 import { EventsModule } from './common/events/events.module';
+import { StatsModule } from './stats/stats.module';
 import { BullModule } from '@nestjs/bullmq';
 
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
@@ -114,6 +115,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     SupportModule,
     ReferralsModule,
     EventsModule,
+    StatsModule,
   ],
   providers: [
     // Global rate limiting guard

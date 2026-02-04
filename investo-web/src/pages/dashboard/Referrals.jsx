@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Gift, TrendingUp, Share2, Award, Copy, CheckCircle, Users, Trophy, RefreshCcw, Loader2 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import ReferralTree from '../../components/dashboard/ReferralTree';
 
 const Referrals = () => {
     const { user } = useAuth();
@@ -136,6 +137,8 @@ const Referrals = () => {
                 <p className="text-sm sm:text-base text-white/50">Invite friends and earn rewards together.</p>
             </div>
 
+            {/* Referral Tree - Seamless Integration */}
+            <ReferralTree />
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="p-5">
@@ -216,127 +219,131 @@ const Referrals = () => {
 
 
             {/* Pending Claims Section */}
-            {(pendingClaims.length > 0 || isRefreshing) && (
-                <section>
-                    <div className="flex items-center justify-between mb-4 sm:mb-6">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center border border-green-500/20">
-                                <Gift size={18} className="sm:w-5 sm:h-5" />
+            {
+                (pendingClaims.length > 0 || isRefreshing) && (
+                    <section>
+                        <div className="flex items-center justify-between mb-4 sm:mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center border border-green-500/20">
+                                    <Gift size={18} className="sm:w-5 sm:h-5" />
+                                </div>
+                                <h2 className="text-lg sm:text-xl font-bold text-white">Ready to Claim</h2>
                             </div>
-                            <h2 className="text-lg sm:text-xl font-bold text-white">Ready to Claim</h2>
-                        </div>
 
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => fetchData(true)}
-                            disabled={isRefreshing}
-                            className="text-white/40 hover:text-white"
-                        >
-                            {isRefreshing ? (
-                                <Loader2 size={16} className="animate-spin" />
-                            ) : (
-                                <RefreshCcw size={16} />
-                            )}
-                            <span className="ml-2 hidden sm:inline">Refresh</span>
-                        </Button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                        {pendingClaims.map(fulfillment => (
-                            <div key={fulfillment.id} className="relative group">
-                                <RewardCard
-                                    reward={fulfillment.reward}
-                                    isClaimable={true}
-                                    claimButtonText="Claim Reward"
-                                    onClaim={() => handleClaimRewardClick(fulfillment)}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </section>
-            )}
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => fetchData(true)}
+                                disabled={isRefreshing}
+                                className="text-white/40 hover:text-white"
+                            >
+                                {isRefreshing ? (
+                                    <Loader2 size={16} className="animate-spin" />
+                                ) : (
+                                    <RefreshCcw size={16} />
+                                )}
+                                <span className="ml-2 hidden sm:inline">Refresh</span>
+                            </Button>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                            {pendingClaims.map(fulfillment => (
+                                <div key={fulfillment.id} className="relative group">
+                                    <RewardCard
+                                        reward={fulfillment.reward}
+                                        isClaimable={true}
+                                        claimButtonText="Claim Reward"
+                                        onClaim={() => handleClaimRewardClick(fulfillment)}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )
+            }
 
             {/* Active Campaigns Section */}
-            {myProgress.length > 0 && (
-                <section>
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-xl bg-white/5 text-white/60 flex items-center justify-center border border-white/10">
-                            <TrendingUp size={20} />
+            {
+                myProgress.length > 0 && (
+                    <section>
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-xl bg-white/5 text-white/60 flex items-center justify-center border border-white/10">
+                                <TrendingUp size={20} />
+                            </div>
+                            <h2 className="text-xl font-bold text-white">Your Progress</h2>
                         </div>
-                        <h2 className="text-xl font-bold text-white">Your Progress</h2>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {myProgress.map((item) => {
-                            const { window, progress } = item;
-                            const isCompleted = progress?.status === 'COMPLETED';
-                            const percent = Math.min(100, ((progress?.qualifiedReferrals || 0) / window.targetReferralCount) * 100);
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {myProgress.map((item) => {
+                                const { window, progress } = item;
+                                const isCompleted = progress?.status === 'COMPLETED';
+                                const percent = Math.min(100, ((progress?.qualifiedReferrals || 0) / window.targetReferralCount) * 100);
 
-                            return (
-                                <Card key={item.window.id} className="p-6" hover>
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div>
-                                            <h3 className="font-bold text-lg text-white mb-1">{window.name}</h3>
-                                            <p className="text-sm text-white/50">
-                                                Goal: {window.targetReferralCount} Referrals
-                                            </p>
-                                        </div>
-                                        {/* <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${isCompleted
+                                return (
+                                    <Card key={item.window.id} className="p-6" hover>
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <h3 className="font-bold text-lg text-white mb-1">{window.name}</h3>
+                                                <p className="text-sm text-white/50">
+                                                    Goal: {window.targetReferralCount} Referrals
+                                                </p>
+                                            </div>
+                                            {/* <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${isCompleted
                                             ? 'bg-green-500/10 text-green-500 border-green-500/20'
                                             : 'bg-white/5 text-white/60 border-white/10'
                                             }`}>
                                             {isCompleted ? 'Completed' : 'In Progress'}
                                         </span> */}
-                                    </div>
-
-                                    <div className="mb-4">
-                                        <div className="flex justify-between text-xs font-bold uppercase tracking-wider mb-2 text-white/40">
-                                            <span>Progress</span>
-                                            <span className="text-white">{progress?.qualifiedReferrals || 0} / {window.targetReferralCount}</span>
                                         </div>
-                                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-white transition-all duration-500"
-                                                style={{ width: `${percent}%` }}
-                                            />
-                                        </div>
-                                    </div>
 
-                                    {window.reward && (
-                                        <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
-                                                    {window.reward.imageUrl ? (
-                                                        <img
-                                                            src={window.reward.imageUrl.startsWith('public/') ? `/${window.reward.imageUrl.replace('public/', '')}` : window.reward.imageUrl}
-                                                            alt="Reward"
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <Gift size={16} className="text-white/30" />
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-sm text-white">{window.reward.name}</p>
-                                                    <p className="text-xs text-white/50">{window.reward.value} USDT</p>
-                                                </div>
+                                        <div className="mb-4">
+                                            <div className="flex justify-between text-xs font-bold uppercase tracking-wider mb-2 text-white/40">
+                                                <span>Progress</span>
+                                                <span className="text-white">{progress?.qualifiedReferrals || 0} / {window.targetReferralCount}</span>
                                             </div>
-
-                                            {isCompleted && (
-                                                <button
-                                                    onClick={() => handleWindowClaimClick(window.reward, window.id)}
-                                                    className="px-4 py-2 bg-white text-black text-xs font-bold uppercase tracking-wide rounded-lg hover:bg-white/90 transition-colors"
-                                                >
-                                                    Claim
-                                                </button>
-                                            )}
+                                            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-white transition-all duration-500"
+                                                    style={{ width: `${percent}%` }}
+                                                />
+                                            </div>
                                         </div>
-                                    )}
-                                </Card>
-                            );
-                        })}
-                    </div>
-                </section>
-            )}
+
+                                        {window.reward && (
+                                            <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
+                                                        {window.reward.imageUrl ? (
+                                                            <img
+                                                                src={window.reward.imageUrl.startsWith('public/') ? `/${window.reward.imageUrl.replace('public/', '')}` : window.reward.imageUrl}
+                                                                alt="Reward"
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <Gift size={16} className="text-white/30" />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold text-sm text-white">{window.reward.name}</p>
+                                                        <p className="text-xs text-white/50">{window.reward.value} USDT</p>
+                                                    </div>
+                                                </div>
+
+                                                {isCompleted && (
+                                                    <button
+                                                        onClick={() => handleWindowClaimClick(window.reward, window.id)}
+                                                        className="px-4 py-2 bg-white text-black text-xs font-bold uppercase tracking-wide rounded-lg hover:bg-white/90 transition-colors"
+                                                    >
+                                                        Claim
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    </section>
+                )
+            }
 
             {/* Referral Goals Section */}
             <section>
@@ -375,17 +382,21 @@ const Referrals = () => {
                 )}
             </section>
 
+
+
             {/* Claim Modal */}
-            {selectedReward && (
-                <ClaimRewardModal
-                    isOpen={!!selectedReward}
-                    onClose={() => setSelectedReward(null)}
-                    reward={selectedReward}
-                    source={claimSource}
-                    onSuccess={handleClaimSuccess}
-                />
-            )}
-        </div>
+            {
+                selectedReward && (
+                    <ClaimRewardModal
+                        isOpen={!!selectedReward}
+                        onClose={() => setSelectedReward(null)}
+                        reward={selectedReward}
+                        source={claimSource}
+                        onSuccess={handleClaimSuccess}
+                    />
+                )
+            }
+        </div >
     );
 };
 

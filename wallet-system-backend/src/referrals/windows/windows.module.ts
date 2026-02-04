@@ -7,10 +7,11 @@ import { ReferralWindowService } from './windows.service';
 import { ReferralWindowListener } from './windows.listener';
 import { WindowsExpiryService } from './windows-expiry.service';
 import { ReferralWindowController } from './windows.controller';
+import { Subscription } from '../../subscriptions/subscription.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([ReferralWindow, ReferralWindowProgress]),
+        TypeOrmModule.forFeature([ReferralWindow, ReferralWindowProgress, Subscription]),
         EventEmitterModule.forRoot(),
     ],
     controllers: [ReferralWindowController],
@@ -18,4 +19,3 @@ import { ReferralWindowController } from './windows.controller';
     exports: [TypeOrmModule, ReferralWindowService],
 })
 export class WindowsModule { }
-

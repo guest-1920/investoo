@@ -19,13 +19,6 @@ const RewardCard = ({ reward, onClaim, isClaimable, claimButtonText = 'Claim Rew
                             {badge}
                         </span>
                     )}
-
-                    {/* Right badge (reward type) */}
-                    {reward.type && (
-                        <span className={`bg-white/10 backdrop-blur-md text-white/80 px-2 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wide border border-white/10 ${!badge ? 'ml-auto' : ''}`}>
-                            {reward.type}
-                        </span>
-                    )}
                 </div>
 
                 {/* Image Container */}
@@ -55,21 +48,10 @@ const RewardCard = ({ reward, onClaim, isClaimable, claimButtonText = 'Claim Rew
                 <div className="flex items-center justify-between pt-3 border-t border-white/5 mt-auto">
                     <div className="flex flex-col">
                         <span className="text-[9px] sm:text-[10px] text-white/30 font-bold uppercase tracking-wider">Value</span>
-                        <div className="text-amber-500 font-bold text-sm sm:text-base font-mono">
+                        <div className="text-white font-bold text-sm sm:text-base font-mono">
                             {reward.value.toLocaleString()} USDT
                         </div>
                     </div>
-
-                    <button
-                        onClick={() => onClaim(reward)}
-                        disabled={!isClaimable}
-                        className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all transform active:scale-95 ${isClaimable
-                            ? 'bg-white hover:bg-white/90 text-black'
-                            : 'bg-white/10 text-white/30 cursor-not-allowed border border-white/5'
-                            }`}
-                    >
-                        {claimButtonText}
-                    </button>
                 </div>
             </div>
         </div>

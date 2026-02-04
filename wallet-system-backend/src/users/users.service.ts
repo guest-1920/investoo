@@ -9,6 +9,7 @@ import {
   WalletTransactionType,
   WalletTransactionStatus,
 } from '../wallet/enums/wallet.enums';
+import { SettingsService } from '../common/settings/settings.service';
 
 @Injectable()
 export class UsersService {
@@ -17,7 +18,8 @@ export class UsersService {
     private readonly usersRepo: Repository<User>,
     @InjectRepository(WalletTransaction)
     private readonly walletTxRepo: Repository<WalletTransaction>,
-  ) {}
+    private readonly settingsService: SettingsService,
+  ) { }
 
   /**
    * Find user by email (case-insensitive)
@@ -235,6 +237,131 @@ export class UsersService {
       totalEarnings,
       activeReferrals,
       commissionHistory,
+    };
+  }
+  /**
+   * Get referral tree data for visualization
+   * Returns all referrals with calculated bonus based on level percentages and plans bought
+   */
+  async getReferralTree(userId: string): Promise<{
+    referrals: Array<{
+      id: string;
+      name: string;
+      referredBy: string;
+      referredByName: string;
+      bonus: number;
+      joinedDate: Date;
+      level: number;
+      plansBought: number;
+      totalPlanValue: number;
+    }>;
+    totalBonus: number;
+    levelPercentages: Array<{ level: number; percentage: number }>;
+  }> {
+    // Get referral settings for level percentages
+    const referralSettings = await this.settingsService.getReferralSettings();
+    const levelPercentages = referralSettings.levels || [];
+
+    // Use recursive CTE to get all referrals up to 10 levels with their level info
+    const referralsWithLevel = await this.usersRepo.query(
+      `
+      WITH RECURSIVE referral_tree AS (
+        -- Base case: direct referrals of the user (level 1)
+        SELECT 
+          "id", 
+          "name", 
+          "referredBy",
+          "createdAt",
+          1 as level
+        FROM "users"
+        WHERE "referredBy" = $1 AND "deletedAt" IS NULL
+        
+        UNION ALL
+        
+        -- Recursive case: referrals of referrals up to level 10
+        SELECT 
+          "u"."id", 
+          "u"."name", 
+          "u"."referredBy",
+          "u"."createdAt",
+          rt."level" + 1
+        FROM "users" "u"
+        INNER JOIN referral_tree rt ON "u"."referredBy" = rt."id"
+        WHERE rt."level" < 10 AND "u"."deletedAt" IS NULL
+      )
+      SELECT * FROM referral_tree ORDER BY level, "createdAt" DESC
+      `,
+      [userId],
+    );
+
+    // Get the current user's name for "Direct" referrals
+    const currentUser = await this.findById(userId);
+    const currentUserName = currentUser?.name || 'You';
+
+    // Build a map of user IDs to names for referrer lookup
+    const userNames = new Map<string, string>();
+    userNames.set(userId, currentUserName);
+
+    referralsWithLevel.forEach((ref: any) => {
+      userNames.set(ref.id, ref.name);
+    });
+
+    const referralIds = referralsWithLevel.map((r: any) => r.id);
+
+    // Get subscription data with plan prices for each referral user
+    const subscriptionData = await this.usersRepo.query(
+      `
+      SELECT 
+        s."userId",
+        COUNT(*) as "planCount",
+        COALESCE(SUM(p."price"), 0) as "totalPlanValue"
+      FROM "subscriptions" s
+      INNER JOIN "plans" p ON p."id" = s."planId"
+      WHERE s."userId" = ANY($1) AND s."deletedAt" IS NULL
+      GROUP BY s."userId"
+      `,
+      [referralIds.length > 0 ? referralIds : ['00000000-0000-0000-0000-000000000000']],
+    );
+
+    const planCountMap = new Map<string, number>();
+    const planValueMap = new Map<string, number>();
+    subscriptionData.forEach((data: any) => {
+      planCountMap.set(data.userId, parseInt(data.planCount, 10));
+      planValueMap.set(data.userId, parseFloat(data.totalPlanValue || '0'));
+    });
+
+    // Build the referral tree data with calculated bonus
+    const referrals = referralsWithLevel.map((ref: any) => {
+      const totalPlanValue = planValueMap.get(ref.id) || 0;
+      const level = ref.level;
+
+      // Find the percentage for this level
+      const levelConfig = levelPercentages.find((l) => l.level === level);
+      const percentage = levelConfig?.percentage || 0;
+
+      // Calculate bonus: (totalPlanValue * percentage) / 100
+      const bonus = (totalPlanValue * percentage) / 100;
+
+      return {
+        id: ref.id,
+        name: ref.name,
+        referredBy: ref.referredBy,
+        referredByName: userNames.get(ref.referredBy) || 'Unknown',
+        bonus: Math.round(bonus * 100) / 100, // Round to 2 decimal places
+        joinedDate: ref.createdAt,
+        level: level,
+        plansBought: planCountMap.get(ref.id) || 0,
+        totalPlanValue: totalPlanValue,
+      };
+    });
+
+    // Calculate total bonus
+    const totalBonus = referrals.reduce((sum: number, ref: any) => sum + ref.bonus, 0);
+
+    return {
+      referrals,
+      totalBonus,
+      levelPercentages,
     };
   }
 }

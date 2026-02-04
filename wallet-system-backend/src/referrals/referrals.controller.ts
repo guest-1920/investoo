@@ -44,4 +44,10 @@ export class ReferralsController {
             pendingRewards,
         };
     }
+
+    @Get('tree')
+    async getTree(@Request() req) {
+        const userId = req.user.id;
+        return this.usersService.getReferralTree(userId);
+    }
 }
