@@ -348,7 +348,7 @@ const Referrals = () => {
             {/* Referral Goals Section */}
             <section>
                 <div className="flex items-center gap-3 mb-4 sm:mb-6">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center border border-amber-500/20">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/5 text-white/60 flex items-center justify-center border border-white/10">
                         <Trophy size={18} className="sm:w-5 sm:h-5" />
                     </div>
                     <h2 className="text-lg sm:text-xl font-bold text-white">Referral Goals</h2>
@@ -356,8 +356,8 @@ const Referrals = () => {
 
                 {activeWindows.length === 0 ? (
                     <Card className="p-8 sm:p-12 text-center">
-                        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Trophy size={24} className="sm:w-7 sm:h-7 text-amber-500/50" />
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Trophy size={24} className="sm:w-7 sm:h-7 text-white/40" />
                         </div>
                         <h3 className="text-base sm:text-lg font-bold text-white mb-2">No Active Goals</h3>
                         <p className="text-sm sm:text-base text-white/50 max-w-sm mx-auto">

@@ -2,17 +2,6 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../api/client';
 
-// --- FALLBACK MOCK DATA ---
-const MOCK_REFERRALS = [
-    { id: 1, name: 'Sarah M.', referredBy: null, bonus: 120, joinedDate: '2024-01-15', level: 1, plansBought: 3, totalPlanValue: 1500 },
-    { id: 2, name: 'John D.', referredBy: null, bonus: 95, joinedDate: '2024-01-20', level: 1, plansBought: 2, totalPlanValue: 1200 },
-    { id: 3, name: 'Emma L.', referredBy: 1, bonus: 45, joinedDate: '2024-02-01', level: 2, plansBought: 1, totalPlanValue: 500 },
-    { id: 4, name: 'Alex K.', referredBy: 1, bonus: 60, joinedDate: '2024-02-10', level: 2, plansBought: 2, totalPlanValue: 800 },
-    { id: 5, name: 'Mike R.', referredBy: 2, bonus: 35, joinedDate: '2024-02-15', level: 2, plansBought: 1, totalPlanValue: 450 },
-    { id: 6, name: 'Lisa P.', referredBy: null, bonus: 85, joinedDate: '2024-02-20', level: 1, plansBought: 2, totalPlanValue: 1000 },
-    { id: 7, name: 'Chris B.', referredBy: 3, bonus: 12, joinedDate: '2024-03-01', level: 3, plansBought: 1, totalPlanValue: 300 },
-    { id: 8, name: 'Kate S.', referredBy: 2, bonus: 28, joinedDate: '2024-03-05', level: 2, plansBought: 1, totalPlanValue: 350 },
-];
 
 // Build hierarchical tree structure
 const buildTree = (referrals) => {
@@ -142,7 +131,7 @@ const ReferralNode = ({ node, index, expandedNodes, onToggle, depth = 1 }) => {
 };
 
 const ReferralTree = () => {
-    const [referrals, setReferrals] = useState(MOCK_REFERRALS);
+    const [referrals, setReferrals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [expandedNodes, setExpandedNodes] = useState(new Set());
     const [isRootExpanded, setIsRootExpanded] = useState(true);
@@ -172,7 +161,6 @@ const ReferralTree = () => {
             }
         };
         fetchReferralTree();
-        setExpandedNodes(new Set(MOCK_REFERRALS.filter(r => r.level === 1).map(r => r.id)));
     }, []);
 
     const tree = useMemo(() => buildTree(referrals), [referrals]);
