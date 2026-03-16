@@ -61,7 +61,7 @@ async function backdateUserCredits() {
     console.log('✅ Connected!\n');
 
     // We take the provided user email
-    const userEmail = process.env.TARGET_EMAIL || 'arunk1389@gmail.com';
+    const userEmail = process.env.TARGET_EMAIL || 'wowiyiw350@bigonla.com';
 
     // Find user
     const userResult = await dataSource.query(
