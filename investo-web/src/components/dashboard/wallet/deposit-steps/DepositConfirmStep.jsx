@@ -6,7 +6,7 @@ import { AlertTriangle, AlertCircle } from 'lucide-react';
 export default function DepositConfirmStep({
     amount,
     chainName,
-    proofKey,
+    transactionId,
     isSubmitting,
     error,
     onBack,
@@ -36,9 +36,8 @@ export default function DepositConfirmStep({
                     <span className="text-green-500 text-xl font-bold tracking-tight">${amount}</span>
                 </div>
                 <div className="space-y-1 py-3 border-b border-white/5">
-                    <span className="text-white/40 text-sm font-bold uppercase tracking-wider block mb-1">Payment Proof</span>
-                    <span className="text-green-400 font-mono text-xs font-bold block">✓ Screenshot Attached</span>
-                    <span className="text-white/20 font-mono text-[10px] break-all block">{proofKey}</span>
+                    <span className="text-white/40 text-sm font-bold uppercase tracking-wider block mb-1">Transaction ID</span>
+                    <span className="text-white font-mono text-sm break-all block">{transactionId}</span>
                 </div>
             </div>
 

@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Recharge, RechargeStatus } from './recharge.entity';
 import { WalletService } from '../wallet/wallet.service';
-import { UploadService } from '../upload/upload.service';
+
 import { WalletTransactionSource } from '../wallet/enums/wallet.enums';
 import { PaginationDto, PaginatedResponseDto } from '../common/dto';
 import { SettingsService } from '../common/settings/settings.service';
@@ -22,7 +22,7 @@ export class RechargeService {
     @InjectRepository(Recharge)
     private readonly repo: Repository<Recharge>,
     private readonly walletService: WalletService,
-    private readonly uploadService: UploadService,
+
     private readonly dataSource: DataSource,
     private readonly settingsService: SettingsService,
   ) { }
@@ -33,7 +33,7 @@ export class RechargeService {
   async create(
     userId: string,
     amount: number,
-    proofKey: string,
+    transactionId: string,
     chainName: string,
   ): Promise<Recharge> {
     const settings = await this.settingsService.getFinancialSettings();
@@ -43,11 +43,19 @@ export class RechargeService {
       );
     }
 
+    // Uniqueness check for transactionId at creation
+    const existing = await this.repo.findOne({ where: { transactionId } });
+    if (existing) {
+      throw new ConflictException(
+        `Transaction ID ${transactionId} has already been submitted.`,
+      );
+    }
+
     const recharge = await this.repo.save(
       this.repo.create({
         userId,
         amount,
-        proofKey,
+        transactionId,
         chainName,
         status: RechargeStatus.PENDING,
       }),
@@ -89,22 +97,12 @@ export class RechargeService {
         );
       }
 
-      // Check transactionId requirements for APPROVAL
+      // Note: We already check uniqueness of transactionId in Create. 
+      // Admin could potentially supply a fixed transactionId or leave it unchanged.
       if (status === RechargeStatus.APPROVED) {
-        if (!transactionId) {
-          throw new BadRequestException(
-            'Transaction ID is required for approval',
-          );
+        if (transactionId) {
+          recharge.transactionId = transactionId;
         }
-
-        // Uniqueness check
-        const existing = await repo.findOne({ where: { transactionId } });
-        if (existing) {
-          throw new ConflictException(
-            `Transaction ID ${transactionId} already used`,
-          );
-        }
-        recharge.transactionId = transactionId;
       }
 
       recharge.status = status;
@@ -137,13 +135,7 @@ export class RechargeService {
     });
   }
 
-  async scanProof(id: string): Promise<any[]> {
-    const recharge = await this.repo.findOne({ where: { id } });
-    if (!recharge) {
-      throw new NotFoundException('Recharge not found');
-    }
-    return this.uploadService.scanStoredObject(recharge.proofKey);
-  }
+
 
   /**
    * ADMIN: Find pending recharges with pagination
@@ -158,18 +150,8 @@ export class RechargeService {
       take: pagination.take,
     });
 
-    // Sign URLs
-    const dataWithSignedUrls = await Promise.all(
-      data.map(async (item) => {
-        const url = await this.uploadService.generateSignedAccessUrl(
-          item.proofKey,
-        );
-        return { ...item, proofUrl: url };
-      }),
-    );
-
     return PaginatedResponseDto.create(
-      dataWithSignedUrls as any,
+      data,
       totalItems,
       pagination.page!,
       pagination.limit!,
@@ -193,18 +175,8 @@ export class RechargeService {
       take: pagination.take,
     });
 
-    // Sign URLs
-    const dataWithSignedUrls = await Promise.all(
-      data.map(async (item) => {
-        const url = await this.uploadService.generateSignedAccessUrl(
-          item.proofKey,
-        );
-        return { ...item, proofUrl: url };
-      }),
-    );
-
     return PaginatedResponseDto.create(
-      dataWithSignedUrls as any,
+      data,
       totalItems,
       pagination.page!,
       pagination.limit!,
@@ -225,18 +197,8 @@ export class RechargeService {
       take: pagination.take,
     });
 
-    // Sign URLs
-    const dataWithSignedUrls = await Promise.all(
-      data.map(async (item) => {
-        const url = await this.uploadService.generateSignedAccessUrl(
-          item.proofKey,
-        );
-        return { ...item, proofUrl: url };
-      }),
-    );
-
     return PaginatedResponseDto.create(
-      dataWithSignedUrls as any,
+      data,
       totalItems,
       pagination.page!,
       pagination.limit!,

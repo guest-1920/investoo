@@ -9,9 +9,9 @@ export class CreateRechargeDto extends AuditFieldsDto {
   @Min(1)
   amount: number;
 
-  @Field({ required: true, label: 'Proof Key' })
+  @Field({ required: true, label: 'Transaction ID' })
   @IsString()
-  proofKey: string;
+  transactionId: string;
 
   @Field({ required: true, label: 'Chain Name' })
   @IsString()

@@ -10,42 +10,12 @@ class RechargeService extends BaseService {
      * Helper to request a recharge
      * POST /recharges
      */
-    /**
-     * Helper to request a recharge
-     * POST /recharges
-     */
-    async requestRecharge(amount, proofKey, chainName) {
+    async requestRecharge(amount, transactionId, chainName) {
         return this.create({
             amount,
-            proofKey,
+            transactionId,
             chainName,
         });
-    }
-
-
-    /**
-     * Upload file to Virtualine Object Storage
-     */
-    async uploadProof(file) {
-
-        // 1. Prepare FormData
-        const formData = new FormData();
-        formData.append('file', file);
-
-        // Upload directly to backend
-        try {
-            const response = await client.post('/upload', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-        
-        return response.data.key;
-        
-        }catch (error) {
-            console.error('Error uploading file:', error);
-            throw new Error('Failed to upload proof');
-        }
     }
 
     /**

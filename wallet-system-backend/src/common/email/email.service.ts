@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import axios from 'axios';
+import * as nodemailer from 'nodemailer';
 import { verificationTemplate } from './templates/verification';
 import { otpTemplate } from './templates/otp';
 import { resetPasswordTemplate } from './templates/reset-password';
@@ -11,48 +11,42 @@ import { fulfillmentStatusTemplate } from './templates/fulfillment-status';
 
 @Injectable()
 export class EmailService {
-  private readonly apiKey: string;
-  private readonly apiUrl: string;
+  private transporter: nodemailer.Transporter;
   private readonly logger = new Logger(EmailService.name);
 
   constructor(private readonly configService: ConfigService) {
-    this.apiKey = this.configService.get<string>('NITROMAIL_API_KEY') || '';
-    this.apiUrl = this.configService.get<string>('NITROMAIL_API_URL') || '';
+    this.transporter = nodemailer.createTransport({
+      host: this.configService.get<string>('SMTP_HOST'),
+      port: Number(this.configService.get<number | string>('SMTP_PORT')) || 587,
+      secure: this.configService.get<string | boolean>('SMTP_SECURE') === 'true' || this.configService.get<string | boolean>('SMTP_SECURE') === true,
+      auth: {
+        user: this.configService.get<string>('SMTP_USER'),
+        pass: this.configService.get<string>('SMTP_PASS'),
+      },
+      tls: {
+          rejectUnauthorized: false,
+      },
+      family: 4, // Forces IPv4 to prevent ETIMEOUT on some networks
+    } as any);
   }
 
-  private async sendEmail(to: string, subject: string, htmlBody: string){
+  private async sendEmail(to: string, subject: string, htmlBody: string) {
     try {
       const senderEmail = process.env.SMTP_FROM || 'no-reply@investoo.net';
       const fromName = 'Investoo';
 
-      const payload = {
-        to: [to],
-        from: `${fromName} <${senderEmail}>`,
-        sender: senderEmail,
-        reply_to: senderEmail,
+      const info = await this.transporter.sendMail({
+        from: `"${fromName}" <${senderEmail}>`,
+        to: to,
         subject: subject,
-        html_body: htmlBody,
-        headers: {charset: 'UTF-8'}
-      };
-
-      const response = await axios.post(this.apiUrl, payload, {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-SERVER-API-KEY': this.apiKey,
-        },
+        html: htmlBody,
       });
 
-      if(response.data.status !== 'success'){
-      this.logger.error(`Failed to send email to ${to}: ${response.data.data || response.data}`);
+      this.logger.log(`Email sent to ${to}, MessageId: ${info.messageId} with subject "${subject}"`);
+      return info;
 
-      throw new Error(`Email service returned error: ${response.data.status}`);
-      }
-
-      this.logger.log(`Email sent to ${to}, Status: ${response.data.status} with subject "${subject}"`);
-      return response.data;
-
-    }catch (error) {
-      this.logger.error(`Error sending email to ${to}: ${error.response?.data || error.message}`, error.stack);
+    } catch (error: any) {
+      this.logger.error(`Error sending email to ${to}: ${error?.message || error}`, error?.stack);
       throw error;
     }
 

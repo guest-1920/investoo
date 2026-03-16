@@ -76,7 +76,7 @@ async function seedDailyReturns() {
     await dataSource.initialize();
     console.log('✅ Connected!\n');
 
-    const userEmail = 'user5@gmail.com';
+    const userEmail = 'wowiyiw350@bigonla.com';
 
     // Find user
     const userResult = await dataSource.query(

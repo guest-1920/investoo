@@ -9,7 +9,7 @@ import DepositSuccessStep from './deposit-steps/DepositSuccessStep';
 export default function DepositTab() {
     const [step, setStep] = useState('intent'); // intent | form | confirm
     const [amount, setAmount] = useState('');
-    const [proofKey, setProofKey] = useState('');
+    const [transactionId, setTransactionId] = useState('');
     const [chainName, setChainName] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -33,7 +33,7 @@ export default function DepositTab() {
         setIsSubmitting(true);
         setError(null);
         try {
-            await rechargeService.requestRecharge(Number(amount), proofKey, chainName);
+            await rechargeService.requestRecharge(Number(amount), transactionId, chainName);
             setSuccess(true);
         } catch (err) {
             let errorMessage = err.response?.data?.message || err.message;
@@ -56,7 +56,7 @@ export default function DepositTab() {
                     setError(null);
                     setAmount('');
                     setAmount('');
-                    setProofKey('');
+                    setTransactionId('');
                 }}
             />
         );
@@ -71,7 +71,7 @@ export default function DepositTab() {
             <DepositConfirmStep
                 amount={amount}
                 chainName={chainName}
-                proofKey={proofKey}
+                transactionId={transactionId}
                 isSubmitting={isSubmitting}
                 error={error}
                 onBack={() => setStep('form')}
@@ -85,8 +85,8 @@ export default function DepositTab() {
         <DepositFormStep
             amount={amount}
             setAmount={setAmount}
-            proofKey={proofKey}
-            setProofKey={setProofKey}
+            transactionId={transactionId}
+            setTransactionId={setTransactionId}
             chainName={chainName}
             setChainName={setChainName}
             isSubmitting={isSubmitting}

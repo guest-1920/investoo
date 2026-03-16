@@ -16,7 +16,7 @@ import { SchemaModule } from './common/schema';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { RedisModule } from './common/redis/redis.module';
 import { EmailQueueModule } from './common/email/email-queue.module';
-import { UploadModule } from './upload/upload.module';
+
 import { SettingsModule } from './common/settings/settings.module';
 import { SupportModule } from './support/support.module';
 import { ReferralsModule } from './referrals/referrals.module';
@@ -110,7 +110,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
       },
     }),
     EmailQueueModule,
-    UploadModule,
     SettingsModule,
     SupportModule,
     ReferralsModule,

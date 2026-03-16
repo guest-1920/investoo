@@ -19,11 +19,14 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migration:generate": "typeorm-ts-node-commonjs migration:generate",
-    "migration:run": "typeorm-ts-node-commonjs migration:run",
+    "migration:run": "typeorm-ts-node-commonjs migration:run -d src/database/typeorm.config.ts",
     "create:admin:dev": "ts-node src/cli/create-admin.ts",
     "create:admin:prod": "node dist/cli/create-admin.js",
     "seed:referrals": "ts-node scripts/seed-referrals.ts",
-    "seed:daily": "ts-node scripts/seed-daily-returns.ts"
+    "seed:daily": "ts-node scripts/seed-daily-returns.ts",
+    "seed:rewards": "ts-node scripts/seed-rewards.ts",
+    "seed:plans": "ts-node scripts/seed-plans.ts",
+    "backdate:user": "ts-node scripts/backdate-user-credits.ts"
   },
   "dependencies": {
     "@nestjs/bullmq": "^11.0.4",
@@ -39,6 +42,7 @@
     "@nestjs/terminus": "^11.0.0",
     "@nestjs/throttler": "^6.5.0",
     "@nestjs/typeorm": "^11.0.0",
+    "@types/sharp": "^0.31.1",
     "axios": "^1.13.4",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.66.5",
@@ -47,9 +51,6 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "helmet": "^8.1.0",
-    "@types/sharp": "^0.31.1",
-    "sharp": "^0.34.5",
-    "ssh2-sftp-client": "^12.0.1",
     "ioredis": "^5.9.2",
     "nodemailer": "^7.0.12",
     "passport": "^0.7.0",
@@ -57,7 +58,7 @@
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "tesseract.js": "^7.0.0"
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -68,9 +69,8 @@
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^22.10.7",
     "@types/multer": "^2.0.0",
-    "@types/ssh2-sftp-client": "^9.0.6",
+    "@types/node": "^22.10.7",
     "@types/nodemailer": "^7.0.5",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",

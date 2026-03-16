@@ -8,7 +8,7 @@ import rechargeService from '../../../../services/recharge.service';
 
 export default function DepositFormStep({
     amount, setAmount,
-    proofKey, setProofKey,
+    transactionId, setTransactionId,
     chainName, setChainName,
     isSubmitting,
     onCancel,
@@ -16,47 +16,16 @@ export default function DepositFormStep({
     settings
 }) {
     const depositAddress = chainName ? import.meta.env[`VITE_WALLET_${chainName}`] : '';
-    const [uploading, setUploading] = React.useState(false);
     const [error, setError] = React.useState('');
-    const minRecharge = settings?.minRecharge || 10;
-
-    const handleFileChange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        setError(''); // Clear previous errors
-
-        // 10MB Limit Check
-        if (file.size > 10 * 1024 * 1024) {
-            setError('File size exceeds the 10MB limit. Please upload a smaller file.');
-            e.target.value = null; // Clear input
-            return;
-        }
-
-        setUploading(true);
-        try {
-            const key = await rechargeService.uploadProof(file);
-            setProofKey(key);
-        } catch (err) {
-            console.error(err);
-            setError('Failed to upload proof. Please try again.');
-            setProofKey(''); // clear proofkey on upload failure
-            e.target.value = null; // clear file input
-        } finally {
-            setUploading(false);
-        }
-    };
+    const minRecharge = settings?.rechargeMinAmount || 10;
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Prevent submission if there's an upload error or no proof uploaded
-        if(error || !proofKey)
+        // Prevent submission if there's no transaction id
+        if(!transactionId)
         {
-            if(!proofKey)
-            {
-                setError('Please upload a payment proof screenshot');
-            }
+            setError('Please enter your transaction ID');
             return;
         }
         onSubmit(e);
@@ -168,60 +137,19 @@ export default function DepositFormStep({
                         </div>
                     )}
 
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-white/50 uppercase tracking-wider">Payment Proof (Screenshot)</label>
-                        <div className={`relative group transition-all duration-300 ${proofKey ? 'opacity-100' : 'hover:opacity-90'}`}>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleFileChange}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                                disabled={uploading}
-                                required={!proofKey}
-                            />
-
-                            <div className={`border border-dashed rounded-xl p-4 transition-all duration-300 flex items-center justify-between gap-4 ${proofKey
-                                ? 'bg-green-500/10 border-green-500/30'
-                                : uploading
-                                    ? 'bg-blue-500/5 border-blue-500/30'
-                                    : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
-                                }`}>
-                                <div className="flex items-center gap-3 overflow-hidden">
-                                    <div className={`p-2.5 rounded-lg shrink-0 transition-colors ${proofKey ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/60'
-                                        }`}>
-                                        {uploading ? (
-                                            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                        ) : proofKey ? (
-                                            <Check size={20} />
-                                        ) : (
-                                            <UploadCloud size={20} />
-                                        )}
-                                    </div>
-                                    <div className="flex flex-col min-w-0">
-                                        <span className={`text-sm font-bold truncate transition-colors ${proofKey ? 'text-green-400' : 'text-white/80'
-                                            }`}>
-                                            {uploading ? 'Uploading Proof...' : proofKey ? 'Screenshot Attached' : 'Upload Screenshot'}
-                                        </span>
-                                        {!proofKey && !uploading && (
-                                            <span className="text-[10px] text-white/40 truncate">Tap to browse or drop file</span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {proofKey && (
-                                    <div className="shrink-0 text-[10px] font-bold bg-green-500/20 text-green-400 px-2 py-1 rounded border border-green-500/20">
-                                        CHANGE
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        <p className="text-[10px] text-white/30">Upload a screenshot of your transaction confirmation. Max 10MB.</p>
-                    </div>
+                    <Input
+                        label="Transaction ID (Hash)"
+                        type="text"
+                        value={transactionId}
+                        onChange={e => { setTransactionId(e.target.value); setError(''); }}
+                        placeholder="Enter the transaction hash/ID..."
+                        required
+                    />
 
                     <Button 
                         type="submit" 
                         isLoading={isSubmitting} 
-                        disabled={ uploading || !!error || !proofKey}
+                        disabled={ !!error || !transactionId}
                         className="w-full py-4 text-sm font-bold"
                     >
                         Proceed to Confirm

@@ -54,10 +54,6 @@ export class Recharge extends AuditedEntity {
   @Column({ unique: true, nullable: true })
   transactionId: string;
 
-  @Field({ label: 'Proof Key', hidden: true })
-  @Column()
-  proofKey: string;
-
   @Field({ label: 'Approved By', order: 5 })
   @Typeahead({
     endpoint: '/users',

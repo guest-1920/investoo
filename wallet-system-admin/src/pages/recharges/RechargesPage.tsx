@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { api, schemaService, type GridColumnSchema, type PaginatedResponse } from '../../services';
 import { Grid, type GridAction } from '../../components/smart/Grid';
 import { Modal } from '../../components/ui/Modal';
-import { CheckIcon, CrossIcon, EyeIcon } from '../../components/ui/Icons';
+import { CheckIcon, CrossIcon } from '../../components/ui/Icons';
 import './RechargesPage.css';
 
 type StatusFilter = 'all' | 'PENDING' | 'APPROVED' | 'REJECTED';
@@ -23,9 +23,6 @@ export function RechargesPage() {
         itemId: string | null;
         remark: string;
         transactionId: string;
-        extractedData: { text: string; geometry?: any }[];
-        proofUrl: string | null;
-        scanning: boolean;
         saving: boolean;
         error: string | null;
     }>({
@@ -34,19 +31,8 @@ export function RechargesPage() {
         itemId: null,
         remark: '',
         transactionId: '',
-        extractedData: [],
-        proofUrl: null,
-        scanning: false,
         saving: false,
         error: null,
-    });
-
-    const [viewProofModal, setViewProofModal] = useState<{
-        isOpen: boolean;
-        proofUrl: string | null;
-    }>({
-        isOpen: false,
-        proofUrl: null,
     });
 
     const fetchData = useCallback(async (currentPage: number, currentFilter: StatusFilter, cols: GridColumnSchema[]) => {
@@ -105,10 +91,7 @@ export function RechargesPage() {
             action: 'APPROVED',
             itemId: row.id as string,
             remark: '',
-            transactionId: '',
-            extractedData: [],
-            proofUrl: row.proofUrl as string || null,
-            scanning: false,
+            transactionId: (row.transactionId as string) || '',
             saving: false,
             error: null,
         });
@@ -120,56 +103,13 @@ export function RechargesPage() {
             action: 'REJECTED',
             itemId: row.id as string,
             remark: '',
-            transactionId: '',
-            extractedData: [],
-            proofUrl: row.proofUrl as string || null,
-            scanning: false,
+            transactionId: (row.transactionId as string) || '',
             saving: false,
             error: null,
         });
     };
 
-    const handleViewProof = (row: Record<string, unknown>) => {
-        if (row.proofUrl) {
-            setViewProofModal({ isOpen: true, proofUrl: row.proofUrl as string });
-        }
-    };
 
-    const handleDownloadProof = async () => {
-        if (!viewProofModal.proofUrl) return;
-        try {
-            const response = await fetch(viewProofModal.proofUrl);
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `proof-${Date.now()}.jpg`; // Give it a name
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-        } catch (err) {
-            console.error('Download failed', err);
-            window.open(viewProofModal.proofUrl, '_blank'); // Fallback
-        }
-    };
-
-    const handleScanProof = async () => {
-        if (!remarkModal.itemId) return;
-        setRemarkModal(prev => ({ ...prev, scanning: true, extractedData: [] }));
-
-        try {
-            const response = await api.post<{ text: string, geometry: any }[]>(`/recharges/${remarkModal.itemId}/scan-proof`);
-            setRemarkModal(prev => ({
-                ...prev,
-                scanning: false,
-                extractedData: response.data
-            }));
-        } catch (err) {
-            console.error('Scan failed', err);
-            setRemarkModal(prev => ({ ...prev, scanning: false, error: 'Failed to scan proof' }));
-        }
-    };
 
     const handleDecision = async () => {
         if (!remarkModal.itemId || !remarkModal.action) return;
@@ -189,9 +129,6 @@ export function RechargesPage() {
                 itemId: null,
                 remark: '',
                 transactionId: '',
-                extractedData: [],
-                proofUrl: null,
-                scanning: false,
                 saving: false,
                 error: null,
             });
@@ -248,14 +185,7 @@ export function RechargesPage() {
             icon: <span className="text-error"><CrossIcon /></span>,
             title: 'Reject',
         },
-        {
-            label: '',
-            variant: 'secondary',
-            onClick: handleViewProof,
-            disabled: (row) => !row.proofUrl,
-            icon: <EyeIcon />,
-            title: 'View Proof',
-        },
+
     ];
 
     return (
@@ -295,7 +225,7 @@ export function RechargesPage() {
                 isOpen={remarkModal.isOpen}
                 onClose={() => setRemarkModal(prev => ({ ...prev, isOpen: false }))}
                 title={remarkModal.action === 'APPROVED' ? 'Approve Recharge' : 'Reject Recharge'}
-                size={remarkModal.proofUrl ? 'lg' : 'md'}
+                size="md"
                 footer={
                     <>
                         <button
@@ -315,244 +245,60 @@ export function RechargesPage() {
                     </>
                 }
             >
-                <div style={{ display: 'flex', gap: '20px', flexDirection: 'row' }}>
-                    {/* Left Column: Form */}
-                    <div style={{ flex: 1, minWidth: '300px' }}>
-                        {remarkModal.error && (
-                            <div style={{
-                                backgroundColor: 'var(--color-error-bg)',
-                                color: 'var(--color-error)',
-                                padding: 'var(--spacing-3)',
-                                borderRadius: 'var(--radius-md)',
-                                marginBottom: 'var(--spacing-4)',
-                                fontSize: 'var(--font-size-sm)',
-                                border: '1px solid var(--color-border)',
-                                borderColor: 'var(--color-error)'
-                            }}>
-                                {remarkModal.error}
-                            </div>
-                        )}
-
-                        <div className="form-group">
-                            <label className="form-label" htmlFor="remark">
-                                Admin Remark (Optional)
-                            </label>
-                            <textarea
-                                id="remark"
-                                className="form-input"
-                                rows={3}
-                                value={remarkModal.remark}
-                                onChange={(e) => setRemarkModal(prev => ({ ...prev, remark: e.target.value }))}
-                                placeholder="Enter a remark..."
-                            />
+                <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
+                    {remarkModal.error && (
+                        <div style={{
+                            backgroundColor: 'var(--color-error-bg)',
+                            color: 'var(--color-error)',
+                            padding: 'var(--spacing-3)',
+                            borderRadius: 'var(--radius-md)',
+                            marginBottom: 'var(--spacing-4)',
+                            fontSize: 'var(--font-size-sm)',
+                            border: '1px solid var(--color-border)',
+                            borderColor: 'var(--color-error)'
+                        }}>
+                            {remarkModal.error}
                         </div>
+                    )}
 
-                        {remarkModal.action === 'APPROVED' && (
-                            <div className="form-group" style={{ marginTop: '1rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                    <label className="form-label" htmlFor="txId">
-                                        Transaction ID <span className="text-error">*</span>
-                                    </label>
-                                    <button
-                                        type="button"
-                                        className="btn btn-sm btn-secondary"
-                                        onClick={handleScanProof}
-                                        disabled={remarkModal.scanning}
-                                    >
-                                        {remarkModal.scanning ? 'Scanning...' : 'Scan Proof'}
-                                    </button>
-                                </div>
-
-                                {remarkModal.extractedData.length > 0 && !remarkModal.extractedData.some(i => i.geometry) && (
-                                    <div style={{
-                                        marginBottom: '0.5rem',
-                                        maxHeight: '150px',
-                                        overflowY: 'auto',
-                                        border: '1px solid #ddd',
-                                        borderRadius: '4px',
-                                        padding: '8px',
-                                        backgroundColor: '#f9f9f9'
-                                    }}>
-                                        <small style={{ display: 'block', marginBottom: '4px', color: '#666', fontSize: '0.75rem' }}>
-                                            Click text to append to Transaction ID:
-                                        </small>
-                                        {remarkModal.extractedData.map((item, idx) => (
-                                            <div
-                                                key={idx}
-                                                onClick={() => setRemarkModal(prev => ({ 
-                                                    ...prev, 
-                                                    transactionId: prev.transactionId? prev.transactionId + item.text : item.text 
-                                                }))}
-                                                style={{ 
-                                                    padding: '4px 8px',
-                                                    margin: '2px 0',
-                                                    cursor: 'pointer',
-                                                    borderRadius: '3px',
-                                                    backgroundColor: '#fff',
-                                                    border: '1px solid #eee',
-                                                    fontSize: '0.85rem',
-                                                    fontFamily: 'monospace'
-                                                }}
-                                                className="hover:bg-blue-50"
-                                                title="Click to append to Transaction ID"
-                                            >
-                                                {item.text}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-
-                                <div style={{ position: 'relative' }}>
-                                    <input
-                                        id="txId"
-                                        type="text"
-                                        className="form-input"
-                                        value={remarkModal.transactionId}
-                                        onChange={(e) => setRemarkModal(prev => ({ ...prev, transactionId: e.target.value }))}
-                                        placeholder="Enter Transaction ID"
-                                        style={{ paddingRight: '30px' }}
-                                    />
-                                    {remarkModal.transactionId && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setRemarkModal(prev => ({ ...prev, transactionId: '' }))}
-                                            style={{
-                                                position: 'absolute',
-                                                right: '8px',
-                                                top: '50%',
-                                                transform: 'translateY(-50%)',
-                                                border: 'none',
-                                                background: 'transparent',
-                                                cursor: 'pointer',
-                                                color: '#999',
-                                                display: 'flex',
-                                                alignItems: 'center'
-                                            }}
-                                            title="Clear"
-                                        >
-                                            <CrossIcon />
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="remark">
+                            Admin Remark (Optional)
+                        </label>
+                        <textarea
+                            id="remark"
+                            className="form-input"
+                            rows={3}
+                            value={remarkModal.remark}
+                            onChange={(e) => setRemarkModal(prev => ({ ...prev, remark: e.target.value }))}
+                            placeholder="Enter a remark..."
+                        />
                     </div>
 
-                    {/* Right Column: Interactive Scan */}
-                    {remarkModal.proofUrl && (
-                        <div style={{ flex: 1, borderLeft: '1px solid #eee', paddingLeft: '20px', display: 'flex', flexDirection: 'column' }}>
-                            <label className="form-label" style={{ marginBottom: '10px' }}>Proof Preview</label>
-                            <div style={{
-                                position: 'relative',
-                                width: '100%',
-                                height: '400px',
-                                background: '#f8f9fa',
-                                borderRadius: '4px',
-                                overflow: 'auto',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center'
-                            }}>
-                                <div style={{ position: 'relative', display: 'inline-block' }}>
-                                    <img
-                                        src={remarkModal.proofUrl}
-                                        alt="Proof"
-                                        style={{ maxWidth: '100%', maxHeight: '100%', display: 'block' }}
-                                    />
-                                    {remarkModal.extractedData.map((item, idx) => {
-                                        if (!item.geometry) return null;
-                                        const { Left, Top, Width, Height } = item.geometry;
-                                        return (
-                                            <div
-                                                key={idx}
-                                                onClick={() => setRemarkModal(prev => ({
-                                                    ...prev,
-                                                    transactionId: prev.transactionId ? prev.transactionId + item.text : item.text
-                                                }))}
-                                                style={{
-                                                    position: 'absolute',
-                                                    left: `${Left * 100}%`,
-                                                    top: `${Top * 100}%`,
-                                                    width: `${Width * 100}%`,
-                                                    height: `${Height * 100}%`,
-                                                    border: '2px solid rgba(37, 99, 235, 0.6)', // Primary Blue
-                                                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                                                    cursor: 'pointer',
-                                                    zIndex: 10
-                                                }}
-                                                title={item.text}
-                                            />
-                                        );
-                                    })}
-                                </div>
+                    {remarkModal.action === 'APPROVED' && (
+                        <div className="form-group" style={{ marginTop: '1rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <label className="form-label" htmlFor="txId">
+                                    Transaction ID <span className="text-error">*</span>
+                                </label>
+                            </div>
+
+                            <div style={{ position: 'relative' }}>
+                                <input
+                                    id="txId"
+                                    type="text"
+                                    className="form-input"
+                                    value={remarkModal.transactionId}
+                                    onChange={(e) => setRemarkModal(prev => ({ ...prev, transactionId: e.target.value }))}
+                                    placeholder="Enter Transaction ID"
+                                />
                             </div>
                         </div>
                     )}
                 </div>
             </Modal>
 
-            {/* Proof Viewer Modal */}
-            <Modal
-                isOpen={viewProofModal.isOpen}
-                onClose={() => setViewProofModal({ isOpen: false, proofUrl: null })}
-                title="Proof Screenshot"
-                footer={
-                    <>
-                        <button
-                            className="btn btn-secondary"
-                            onClick={() => setViewProofModal({ isOpen: false, proofUrl: null })}
-                        >
-                            Close
-                        </button>
-                        <button
-                            className="btn btn-primary"
-                            onClick={handleDownloadProof}
-                        >
-                            Download
-                        </button>
-                    </>
-                }
-            >
-                <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px', background: '#000', overflow: 'auto' }}>
-                    {viewProofModal.proofUrl ? (
-                        <div style={{ position: 'relative', display: 'inline-block' }}>
-                            <img
-                                src={viewProofModal.proofUrl}
-                                alt="Payment Proof"
-                                style={{ maxWidth: '100%', maxHeight: '600px', objectFit: 'contain', display: 'block' }}
-                            />
-                            {/* OCR Overlays */}
-                            {remarkModal.extractedData.map((item, idx) => {
-                                if (!item.geometry) return null;
-                                const { Left, Top, Width, Height } = item.geometry;
-                                return (
-                                    <div
-                                        key={idx}
-                                        onClick={() => setRemarkModal(prev => ({
-                                            ...prev,
-                                            transactionId: prev.transactionId ? prev.transactionId + item.text : item.text
-                                        }))}
-                                        style={{
-                                            position: 'absolute',
-                                            left: `${Left * 100}%`,
-                                            top: `${Top * 100}%`,
-                                            width: `${Width * 100}%`,
-                                            height: `${Height * 100}%`,
-                                            border: '2px solid rgba(37, 99, 235, 0.6)',
-                                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                                            cursor: 'pointer',
-                                            zIndex: 10
-                                        }}
-                                        title={`Click to append: ${item.text}`}
-                                    />
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <span style={{ color: '#fff' }}>No proof available</span>
-                    )}
-                </div>
-            </Modal>
+
         </div>
     );
 }

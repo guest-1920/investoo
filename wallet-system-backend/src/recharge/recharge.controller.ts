@@ -39,7 +39,7 @@ export class RechargeController {
     return this.service.create(
       req.user.id,
       dto.amount,
-      dto.proofKey,
+      dto.transactionId,
       dto.chainName,
     );
   }
@@ -99,14 +99,5 @@ export class RechargeController {
     );
   }
 
-  /**
-   * POST /recharges/:id/scan-proof
-   * ADMIN: Scan proof for text
-   */
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
-  @Post(':id/scan-proof')
-  scanProof(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.scanProof(id);
-  }
+
 }
