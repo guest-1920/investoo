@@ -78,8 +78,8 @@ async function backdateUserCredits() {
     const userId = user.id;
     console.log(`👤 Found user: ${userId} (${userEmail})`);
 
-    // Backdate the user created AT to Feb 09
-    const targetDateStr = '2026-02-09T00:00:00.000Z';
+    // Backdate the user created AT to Mar 09
+    const targetDateStr = '2026-03-09T00:00:00.000Z';
     const targetDate = new Date(targetDateStr);
 
     console.log(`⏱️ Backdating user creation to ${targetDateStr}`);
@@ -134,7 +134,7 @@ async function backdateUserCredits() {
     let totalProfit = 0;
 
     for (let i = 0; i < daysToSimulate; i++) {
-        // Step forward day by day from Feb 09
+        // Step forward day by day from Mar 09
         const creditDate = new Date(startTimestamp + (i * DAY_IN_MS));
         
         const returnId = randomUUID();
@@ -267,7 +267,7 @@ async function backdateUserCredits() {
     // ========== VERIFICATION ==========
     
     console.log(`\n📈 Final Report for ${userEmail}:`);
-    console.log(`   - Date Range Generated: Feb 09 -> Mar 16`);
+    console.log(`   - Date Range Generated: Mar 09 -> Mar 16`);
     console.log(`   - Days processed: ${daysToSimulate}`);
     console.log(`   - Backdated Amount Added: $${totalProfit.toFixed(2)}`);
     console.log(`   - New Wallet Balance: $${newWalletBalance.toFixed(2)}`);
