@@ -149,7 +149,7 @@ npm run migration:run
 
 echo "  Starting backend with PM2..."
 pm2 delete investo-backend 2>/dev/null || true
-pm2 start dist/main.js --name investo-backend
+pm2 start dist/src/main.js --name investo-backend
 pm2 save
 
 # -------------------------------------------------------
