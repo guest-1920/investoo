@@ -1,6 +1,6 @@
 name: Deploy Web Client
 
-on: 
+on:
   push:
     branches: [main]
     paths:
@@ -21,11 +21,11 @@ jobs:
 
       - name: Deploy Web Client
         run: |
-          ssh -o StrictHostKeyChecking=no root@${{ secrets.VPS_IP }} << 'EOF'
-            cd /var/www/investoo/investoo/investo-web
+          ssh -o StrictHostKeyChecking=no root@178.16.52.195 << 'EOF'
+            set -e
+            cd /var/www/investoo/investo-web
             git pull origin main
             npm ci
-            # Re-inject env var if needed
-            # echo "Vite_API_URL=https://api.investoo.co.in/api/v1" > .env
             npm run build
+            echo "Web client deployed successfully"
           EOF

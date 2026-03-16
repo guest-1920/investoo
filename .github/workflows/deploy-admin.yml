@@ -2,7 +2,7 @@ name: Deploy Admin Panel
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'wallet-system-admin/**'
 
@@ -19,11 +19,13 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
 
-      - name: Deploy Admin
+      - name: Deploy Admin Panel
         run: |
-          ssh -o StrictHostKeyChecking=no root@${{ secrets.VPS_IP }} << 'EOF'
-            cd /var/www/investoo/investoo/wallet-system-admin
+          ssh -o StrictHostKeyChecking=no root@178.16.52.195 << 'EOF'
+            set -e
+            cd /var/www/investoo/wallet-system-admin
             git pull origin main
             npm ci
             npm run build
+            echo "Admin panel deployed successfully"
           EOF
