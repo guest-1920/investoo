@@ -83,7 +83,7 @@ mkdir -p /var/www/investoo
 mkdir -p /etc/ssl/cloudflare
 
 # Clone or update the repo
-REPO_URL="https://github.com/YOUR_GITHUB_USERNAME/investoo.git"  # <-- UPDATE THIS
+REPO_URL="https://github.com/guest-1920/investoo.git"
 
 if [ -d "/var/www/investoo/.git" ]; then
   echo "  Repo already exists — pulling latest..."
